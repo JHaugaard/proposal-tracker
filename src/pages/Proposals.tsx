@@ -1,8 +1,18 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ProposalForm } from '@/components/ProposalForm';
 
 const Proposals = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    // TODO: Refresh the proposals list when we implement it
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -12,10 +22,20 @@ const Proposals = () => {
             Manage and track all your proposals
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Proposal
-        </Button>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Proposal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Proposal</DialogTitle>
+            </DialogHeader>
+            <ProposalForm onSuccess={handleFormSuccess} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -30,10 +50,20 @@ const Proposals = () => {
             <p className="text-sm text-muted-foreground mb-4">
               No proposals found. Add your first proposal to get started.
             </p>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Proposal
-            </Button>
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Proposal
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Proposal</DialogTitle>
+                </DialogHeader>
+                <ProposalForm onSuccess={handleFormSuccess} />
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
