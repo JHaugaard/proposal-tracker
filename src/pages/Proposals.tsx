@@ -50,20 +50,10 @@ const Proposals = () => {
             <p className="text-sm text-muted-foreground mb-4">
               No proposals found. Add your first proposal to get started.
             </p>
-            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Proposal
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Add New Proposal</DialogTitle>
-                </DialogHeader>
-                <ProposalForm onSuccess={handleFormSuccess} />
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setIsFormOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add First Proposal
+            </Button>
           </div>
         </CardContent>
       </Card>
