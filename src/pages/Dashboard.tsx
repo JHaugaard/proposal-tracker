@@ -1,17 +1,27 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Users, Building2, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileText, Users, Building2, TrendingUp, Plus } from 'lucide-react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { stats, loading } = useDashboard();
+  const navigate = useNavigate();
+  
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your proposal tracking system
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of your proposal tracking system
+          </p>
+        </div>
+        <Button onClick={() => navigate('/proposals')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Proposal
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

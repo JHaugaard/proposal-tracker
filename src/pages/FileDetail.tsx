@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ArrowLeft, Edit, Save, X, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +37,8 @@ export default function FileDetail() {
   const [file, setFile] = useState<FileRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [editedStatus, setEditedStatus] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -77,6 +80,7 @@ export default function FileDetail() {
       };
 
       setFile(formattedFile);
+      setEditedStatus(formattedFile.status);
     } catch (error) {
       console.error('Error fetching file:', error);
       toast({
@@ -121,6 +125,45 @@ export default function FileDetail() {
     setIsEditing(false);
     fetchFile(); // Refresh the data
   };
+
+  const handleStatusChange = (newStatus: string) => {
+    setEditedStatus(newStatus);
+    setHasChanges(file?.status !== newStatus);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!file || !hasChanges) return;
+
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          status: editedStatus as any,
+          date_status_change: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Proposal status updated successfully.",
+      });
+
+      setHasChanges(false);
+      await fetchFile(); // Refresh the data
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const statusOptions = ['In', 'Process', 'Pending', 'Pending Signatures', 'Done', 'On Hold', 'Withdrawn'];
 
   if (loading) {
     return (
@@ -172,6 +215,12 @@ export default function FileDetail() {
         <div className="flex items-center gap-2">
           {!isEditing ? (
             <>
+              {hasChanges && (
+                <Button onClick={handleSaveChanges}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              )}
               <Button onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
@@ -247,9 +296,27 @@ export default function FileDetail() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
                   <div className="mt-1">
-                    <Badge variant={getStatusColor(file.status)}>
-                      {file.status}
-                    </Badge>
+                    <Select
+                      value={editedStatus}
+                      onValueChange={handleStatusChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          <Badge variant={getStatusColor(editedStatus)}>
+                            {editedStatus}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            <Badge variant={getStatusColor(status)}>
+                              {status}
+                            </Badge>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
