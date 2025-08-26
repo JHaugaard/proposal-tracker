@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      file_attachments: {
+        Row: {
+          file_id: string
+          file_path: string
+          file_size: number
+          filename: string
+          id: string
+          uploaded_at: string
+        }
+        Insert: {
+          file_id: string
+          file_path: string
+          file_size: number
+          filename: string
+          id?: string
+          uploaded_at?: string
+        }
+        Update: {
+          file_id?: string
+          file_path?: string
+          file_size?: number
+          filename?: string
+          id?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_attachments_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          cayuse: string | null
+          created_at: string
+          date_received: string | null
+          date_status_change: string
+          db_no: string
+          external_link: string | null
+          id: string
+          notes: string | null
+          pi_id: string
+          sponsor_id: string
+          status: Database["public"]["Enums"]["proposal_status"]
+          to_set_up: string | null
+          updated_at: string
+        }
+        Insert: {
+          cayuse?: string | null
+          created_at?: string
+          date_received?: string | null
+          date_status_change?: string
+          db_no: string
+          external_link?: string | null
+          id?: string
+          notes?: string | null
+          pi_id: string
+          sponsor_id: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          to_set_up?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cayuse?: string | null
+          created_at?: string
+          date_received?: string | null
+          date_status_change?: string
+          db_no?: string
+          external_link?: string | null
+          id?: string
+          notes?: string | null
+          pi_id?: string
+          sponsor_id?: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          to_set_up?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_pi_id_fkey"
+            columns: ["pi_id"]
+            isOneToOne: false
+            referencedRelation: "pis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pis: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +154,24 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -46,7 +180,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      proposal_status:
+        | "In"
+        | "Pending"
+        | "Pending Signatures"
+        | "Process"
+        | "Done"
+        | "On Hold"
+        | "Withdrawn"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,6 +314,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      proposal_status: [
+        "In",
+        "Pending",
+        "Pending Signatures",
+        "Process",
+        "Done",
+        "On Hold",
+        "Withdrawn",
+      ],
+    },
   },
 } as const

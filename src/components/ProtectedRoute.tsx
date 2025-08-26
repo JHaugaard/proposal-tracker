@@ -2,9 +2,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import { AppLayout } from '@/components/AppLayout';
-import Dashboard from './Dashboard';
 
-const Index = () => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -28,11 +31,5 @@ const Index = () => {
     return null;
   }
 
-  return (
-    <AppLayout>
-      <Dashboard />
-    </AppLayout>
-  );
-};
-
-export default Index;
+  return <AppLayout>{children}</AppLayout>;
+}
