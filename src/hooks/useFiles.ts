@@ -27,6 +27,7 @@ export function useFiles() {
   const [files, setFiles] = useState<FileRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('date_received');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const { toast } = useToast();
@@ -107,9 +108,15 @@ export function useFiles() {
     }
   };
 
-  const filteredFiles = files.filter(file => 
-    statusFilter === 'All' || file.status === statusFilter
-  );
+  const filteredFiles = files.filter(file => {
+    const matchesStatus = statusFilter === 'All' || file.status === statusFilter;
+    const matchesSearch = !searchQuery || 
+      file.db_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.pi_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.sponsor_name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
+  });
 
   const statusCounts = files.reduce((acc, file) => {
     acc[file.status] = (acc[file.status] || 0) + 1;
@@ -125,6 +132,8 @@ export function useFiles() {
     loading,
     statusFilter,
     setStatusFilter,
+    searchQuery,
+    setSearchQuery,
     sortField,
     sortDirection,
     handleSort,

@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from 'lucide-react';
 import { FileRecord, SortField, SortDirection } from '@/hooks/useFiles';
+import { HighlightText } from './HighlightText';
 
 interface ProposalsTableProps {
   files: FileRecord[];
@@ -13,6 +14,7 @@ interface ProposalsTableProps {
   onSort: (field: SortField) => void;
   onStatusChange: (fileId: string, status: string) => void;
   onEdit: (file: FileRecord) => void;
+  searchQuery?: string;
 }
 
 const statusOptions = [
@@ -89,6 +91,7 @@ export function ProposalsTable({
   onSort,
   onStatusChange,
   onEdit,
+  searchQuery = '',
 }: ProposalsTableProps) {
   if (loading) {
     return (
@@ -138,9 +141,15 @@ export function ProposalsTable({
       <TableBody>
         {files.map((file) => (
           <TableRow key={file.id}>
-            <TableCell className="font-medium">{file.db_no}</TableCell>
-            <TableCell>{file.pi_name}</TableCell>
-            <TableCell>{file.sponsor_name}</TableCell>
+            <TableCell className="font-medium">
+              <HighlightText text={file.db_no} searchQuery={searchQuery} />
+            </TableCell>
+            <TableCell>
+              <HighlightText text={file.pi_name} searchQuery={searchQuery} />
+            </TableCell>
+            <TableCell>
+              <HighlightText text={file.sponsor_name} searchQuery={searchQuery} />
+            </TableCell>
             <TableCell>
               <Select
                 value={file.status}

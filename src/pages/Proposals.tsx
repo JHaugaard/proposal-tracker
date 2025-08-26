@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ProposalForm } from '@/components/ProposalForm';
 import { ProposalsTable } from '@/components/ProposalsTable';
 import { StatusFilters } from '@/components/StatusFilters';
+import { SearchBar } from '@/components/SearchBar';
 import { useFiles, FileRecord } from '@/hooks/useFiles';
 
 const Proposals = () => {
@@ -17,6 +18,8 @@ const Proposals = () => {
     loading,
     statusFilter,
     setStatusFilter,
+    searchQuery,
+    setSearchQuery,
     sortField,
     sortDirection,
     handleSort,
@@ -83,22 +86,39 @@ const Proposals = () => {
               </CardDescription>
             </div>
           </div>
-          <StatusFilters
-            activeFilter={statusFilter}
-            onFilterChange={setStatusFilter}
-            statusCounts={statusCounts}
-          />
+          <div className="space-y-4">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              resultsCount={files.length}
+              loading={loading}
+            />
+            <StatusFilters
+              activeFilter={statusFilter}
+              onFilterChange={setStatusFilter}
+              statusCounts={statusCounts}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {files.length === 0 && !loading ? (
             <div className="text-center py-8">
               <p className="text-sm text-muted-foreground mb-4">
-                No proposals found. Add your first proposal to get started.
+                {searchQuery ? 
+                  `No proposals found matching "${searchQuery}". Try a different search term or clear the search.` :
+                  'No proposals found. Add your first proposal to get started.'
+                }
               </p>
-              <Button onClick={() => setIsFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Proposal
-              </Button>
+              {searchQuery ? (
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  Clear Search
+                </Button>
+              ) : (
+                <Button onClick={() => setIsFormOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Proposal
+                </Button>
+              )}
             </div>
           ) : (
             <ProposalsTable
@@ -109,6 +129,7 @@ const Proposals = () => {
               onSort={handleSort}
               onStatusChange={updateFileStatus}
               onEdit={handleEdit}
+              searchQuery={searchQuery}
             />
           )}
         </CardContent>
