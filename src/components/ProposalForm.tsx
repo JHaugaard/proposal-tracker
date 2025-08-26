@@ -44,9 +44,10 @@ const statusOptions = [
 
 interface ProposalFormProps {
   onSuccess?: () => void;
+  editingFile?: any;
 }
 
-export function ProposalForm({ onSuccess }: ProposalFormProps) {
+export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { pis, createPI } = usePIs();
   const { sponsors, createSponsor } = useSponsors();
