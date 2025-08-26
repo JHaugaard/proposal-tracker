@@ -11,9 +11,16 @@ export interface FileAttachment {
   uploaded_at: string;
 }
 
+export interface UploadProgress {
+  fileName: string;
+  progress: number;
+  status: 'uploading' | 'success' | 'error';
+}
+
 export function useFileAttachments(fileId: string) {
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const { toast } = useToast();
 
   const fetchAttachments = async () => {
@@ -43,14 +50,35 @@ export function useFileAttachments(fileId: string) {
 
   const uploadFile = async (file: File): Promise<boolean> => {
     try {
-      const fileExt = file.name.split('.').pop();
+      // Add to progress tracking
+      const progressEntry: UploadProgress = {
+        fileName: file.name,
+        progress: 0,
+        status: 'uploading'
+      };
+      setUploadProgress(prev => [...prev, progressEntry]);
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${fileId}/${fileName}`;
 
-      // Upload to storage
+      // Upload to storage with progress simulation
       const { error: uploadError } = await supabase.storage
         .from('file-attachments')
         .upload(filePath, file);
+
+      // Simulate progress for UI feedback
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => 
+          prev.map(p => 
+            p.fileName === file.name && p.progress < 90
+              ? { ...p, progress: p.progress + 10 }
+              : p
+          )
+        );
+      }, 100);
+
+      setTimeout(() => clearInterval(progressInterval), 500);
 
       if (uploadError) throw uploadError;
 
@@ -66,20 +94,51 @@ export function useFileAttachments(fileId: string) {
 
       if (dbError) throw dbError;
 
+      // Update progress to success
+      setUploadProgress(prev => 
+        prev.map(p => 
+          p.fileName === file.name 
+            ? { ...p, progress: 100, status: 'success' }
+            : p
+        )
+      );
+
       toast({
         title: "Success",
-        description: "File uploaded successfully.",
+        description: `${file.name} uploaded successfully.`,
       });
 
       fetchAttachments(); // Refresh the list
+      
+      // Remove from progress after a delay
+      setTimeout(() => {
+        setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
+      }, 2000);
+
       return true;
     } catch (error) {
       console.error('Error uploading file:', error);
+      
+      // Update progress to error
+      setUploadProgress(prev => 
+        prev.map(p => 
+          p.fileName === file.name 
+            ? { ...p, status: 'error' }
+            : p
+        )
+      );
+
       toast({
         title: "Error",
-        description: "Failed to upload file. Please try again.",
+        description: `Failed to upload ${file.name}. Please try again.`,
         variant: "destructive",
       });
+
+      // Remove from progress after a delay
+      setTimeout(() => {
+        setUploadProgress(prev => prev.filter(p => p.fileName !== file.name));
+      }, 3000);
+
       return false;
     }
   };
@@ -153,6 +212,7 @@ export function useFileAttachments(fileId: string) {
   return {
     attachments,
     loading,
+    uploadProgress,
     uploadFile,
     deleteAttachment,
     downloadFile,
