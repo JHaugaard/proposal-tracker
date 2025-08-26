@@ -1,7 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Users, Building2, TrendingUp } from 'lucide-react';
+import { useDashboard } from '@/hooks/useDashboard';
+import { formatDistanceToNow } from 'date-fns';
 
 const Dashboard = () => {
+  const { stats, loading } = useDashboard();
   return (
     <div className="space-y-6">
       <div>
@@ -18,9 +21,9 @@ const Dashboard = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalProposals}</div>
             <p className="text-xs text-muted-foreground">
-              No proposals yet
+              {stats.totalProposals === 1 ? 'proposal' : 'proposals'} total
             </p>
           </CardContent>
         </Card>
@@ -31,7 +34,7 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.activePIs}</div>
             <p className="text-xs text-muted-foreground">
               Principal Investigators
             </p>
@@ -44,7 +47,7 @@ const Dashboard = () => {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.totalSponsors}</div>
             <p className="text-xs text-muted-foreground">
               Funding organizations
             </p>
@@ -57,7 +60,7 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.inProgressCount}</div>
             <p className="text-xs text-muted-foreground">
               Active proposals
             </p>
@@ -74,9 +77,27 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              No recent activity. Start by adding your first proposal.
-            </p>
+            {stats.recentActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No recent activity. Start by adding your first proposal.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {stats.recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-medium">{activity.db_no}</span>
+                      <span className="text-muted-foreground"> • {activity.pi_name}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(activity.updated_at), { addSuffix: true })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -88,9 +109,20 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              No proposals to display. Add some proposals to see status distribution.
-            </p>
+            {Object.keys(stats.statusCounts).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No proposals to display. Add some proposals to see status distribution.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {Object.entries(stats.statusCounts).map(([status, count]) => (
+                  <div key={status} className="flex justify-between items-center text-sm">
+                    <span>{status}</span>
+                    <span className="font-medium">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
