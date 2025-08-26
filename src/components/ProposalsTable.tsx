@@ -179,13 +179,22 @@ export function ProposalsTable({
               {new Date(file.date_status_change).toLocaleDateString()}
             </TableCell>
             <TableCell>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(file)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(file)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(`/proposals/${file.id}`, '_blank')}
+                >
+                  View
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}

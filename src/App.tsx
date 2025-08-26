@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Proposals from "./pages/Proposals";
+import FileDetail from "./pages/FileDetail";
 import PIs from "./pages/PIs";
 import Sponsors from "./pages/Sponsors";
 import Settings from "./pages/Settings";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
+            <Route path="/proposals/:id" element={<ProtectedRoute><FileDetail /></ProtectedRoute>} />
             <Route path="/pis" element={<ProtectedRoute><PIs /></ProtectedRoute>} />
             <Route path="/sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
