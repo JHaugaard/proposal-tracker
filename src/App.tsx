@@ -12,6 +12,7 @@ import FileDetail from "./pages/FileDetail";
 import PIs from "./pages/PIs";
 import Sponsors from "./pages/Sponsors";
 import Settings from "./pages/Settings";
+import ImportData from "./pages/ImportData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/proposals/:id" element={<ProtectedRoute><FileDetail /></ProtectedRoute>} />
             <Route path="/pis" element={<ProtectedRoute><PIs /></ProtectedRoute>} />
             <Route path="/sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
+            <Route path="/import" element={<ProtectedRoute><ImportData /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
