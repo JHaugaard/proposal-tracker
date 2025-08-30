@@ -99,6 +99,39 @@ export function useFiles() {
     }
   };
 
+  const bulkClearWithdrawnStatusChange = async () => {
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          date_status_change: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('status', 'Withdrawn');
+
+      if (error) throw error;
+
+      // Update local state
+      setFiles(prev => prev.map(file => 
+        file.status === 'Withdrawn' 
+          ? { ...file, date_status_change: '', updated_at: new Date().toISOString() }
+          : file
+      ));
+
+      toast({
+        title: "Success",
+        description: "Status changed dates cleared for all withdrawn files.",
+      });
+    } catch (error) {
+      console.error('Error clearing withdrawn status dates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear status dates. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -139,6 +172,7 @@ export function useFiles() {
     handleSort,
     statusCounts,
     updateFileStatus,
+    bulkClearWithdrawnStatusChange,
     refetch: fetchFiles,
   };
 }

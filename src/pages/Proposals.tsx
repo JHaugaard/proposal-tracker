@@ -25,6 +25,7 @@ const Proposals = () => {
     handleSort,
     statusCounts,
     updateFileStatus,
+    bulkClearWithdrawnStatusChange,
     refetch,
   } = useFiles();
 
@@ -55,25 +56,34 @@ const Proposals = () => {
             Manage and track all your proposals
           </p>
         </div>
-        <Dialog open={isFormOpen} onOpenChange={handleDialogChange}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Proposal
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingFile ? 'Edit Proposal' : 'Add New Proposal'}
-              </DialogTitle>
-            </DialogHeader>
-            <ProposalForm 
-              onSuccess={handleFormSuccess} 
-              editingFile={editingFile}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={bulkClearWithdrawnStatusChange}
+            className="text-sm"
+          >
+            Clear Withdrawn Status Dates
+          </Button>
+          <Dialog open={isFormOpen} onOpenChange={handleDialogChange}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Proposal
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingFile ? 'Edit Proposal' : 'Add New Proposal'}
+                </DialogTitle>
+              </DialogHeader>
+              <ProposalForm 
+                onSuccess={handleFormSuccess} 
+                editingFile={editingFile}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
