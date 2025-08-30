@@ -385,7 +385,13 @@ export default function FileDetail() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Status Last Changed</label>
                 <p className="font-medium">
-                  {new Date(file.date_status_change).toLocaleDateString()}
+                  {file.date_status_change 
+                    ? (() => {
+                        const d = new Date(file.date_status_change);
+                        return !isNaN(d.getTime()) ? d.toLocaleDateString() : 'Not set';
+                      })()
+                    : 'Not set'
+                  }
                 </p>
               </div>
 

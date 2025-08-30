@@ -7,7 +7,7 @@ export interface FileRecord {
   db_no: string;
   status: 'In' | 'Pending' | 'Pending Signatures' | 'Process' | 'Done' | 'On Hold' | 'Withdrawn';
   date_received: string | null;
-  date_status_change: string;
+  date_status_change: string | null;
   notes: string | null;
   external_link: string | null;
   cayuse: string | null;
@@ -114,7 +114,7 @@ export function useFiles() {
       // Update local state
       setFiles(prev => prev.map(file => 
         file.status === 'Withdrawn' 
-          ? { ...file, date_status_change: '', updated_at: new Date().toISOString() }
+          ? { ...file, date_status_change: null, updated_at: new Date().toISOString() }
           : file
       ));
 
