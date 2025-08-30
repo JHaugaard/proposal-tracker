@@ -61,7 +61,7 @@ export type Database = {
           cayuse: string | null
           created_at: string
           date_received: string | null
-          date_status_change: string
+          date_status_change: string | null
           db_no: string
           external_link: string | null
           id: string
@@ -76,7 +76,7 @@ export type Database = {
           cayuse?: string | null
           created_at?: string
           date_received?: string | null
-          date_status_change?: string
+          date_status_change?: string | null
           db_no: string
           external_link?: string | null
           id?: string
@@ -91,7 +91,7 @@ export type Database = {
           cayuse?: string | null
           created_at?: string
           date_received?: string | null
-          date_status_change?: string
+          date_status_change?: string | null
           db_no?: string
           external_link?: string | null
           id?: string
