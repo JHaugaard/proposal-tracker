@@ -176,7 +176,10 @@ export function ProposalsTable({
               }
             </TableCell>
             <TableCell>
-              {new Date(file.date_status_change).toLocaleDateString()}
+              {file.date_status_change 
+                ? new Date(file.date_status_change).toLocaleDateString()
+                : '-'
+              }
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
