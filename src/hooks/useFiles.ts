@@ -35,23 +35,40 @@ export function useFiles() {
   const fetchFiles = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('files')
-        .select(`
-          *,
-          pis!inner(name),
-          sponsors!inner(name)
-        `)
-        .order(sortField === 'pi_name' ? 'pis.name' : sortField === 'sponsor_name' ? 'sponsors.name' : sortField, { ascending: sortDirection === 'asc' });
+      let allFiles: any[] = [];
+      const pageSize = 1000;
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('files')
+          .select(`
+            *,
+            pis!inner(name),
+            sponsors!inner(name)
+          `)
+          .order(sortField === 'pi_name' ? 'pis.name' : sortField === 'sponsor_name' ? 'sponsors.name' : sortField, { ascending: sortDirection === 'asc' })
+          .range(from, from + pageSize - 1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          allFiles = [...allFiles, ...data];
+          hasMore = data.length === pageSize;
+          from += pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
       
-      if (error) throw error;
-      
-      const formattedFiles = data?.map(file => ({
+      const formattedFiles = allFiles.map(file => ({
         ...file,
         pi_name: file.pis.name,
         sponsor_name: file.sponsors.name,
-      })) || [];
+      }));
 
+      console.log(`Loaded ${formattedFiles.length} total proposals`);
       setFiles(formattedFiles);
     } catch (error) {
       console.error('Error fetching files:', error);
