@@ -60,7 +60,17 @@ interface FileData {
   external_link: string;
 }
 
-const VALID_STATUSES = ['In', 'In Progress', 'Approved', 'Declined', 'On Hold', 'Withdrawn'];
+const VALID_STATUSES = ['In', 'Pending', 'Pending Signatures', 'Process', 'Done', 'On Hold', 'Withdrawn'];
+
+// Normalize status values to handle common variations
+function normalizeStatus(status: string): string {
+  const trimmed = status.trim();
+  // Map "Pending Signature" (singular) to "Pending Signatures" (plural)
+  if (trimmed === 'Pending Signature') {
+    return 'Pending Signatures';
+  }
+  return trimmed;
+}
 
 export function useDataImport() {
   const [step, setStep] = useState(1);
@@ -148,12 +158,17 @@ export function useDataImport() {
           field: 'status',
           message: 'status is required'
         });
-      } else if (!VALID_STATUSES.includes(file.status)) {
-        errors.push({
-          row: rowNum,
-          field: 'status',
-          message: `Invalid status: ${file.status}. Must be one of: ${VALID_STATUSES.join(', ')}`
-        });
+      } else {
+        const normalizedStatus = normalizeStatus(file.status);
+        if (!VALID_STATUSES.includes(normalizedStatus)) {
+          errors.push({
+            row: rowNum,
+            field: 'status',
+            message: `Invalid status: ${file.status}. Must be one of: ${VALID_STATUSES.join(', ')}`
+          });
+        }
+        // Update the file status to the normalized version
+        file.status = normalizedStatus;
       }
 
       // Check PI exists
