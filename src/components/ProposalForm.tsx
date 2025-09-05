@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,6 +18,7 @@ import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 import { usePIs, useSponsors } from '@/hooks/useProposalData';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import type { FileRecord } from '@/hooks/useFiles';
 
 const proposalFormSchema = z.object({
   db_no: z.string().min(1, 'DB No. is required'),
@@ -44,13 +45,14 @@ const statusOptions = [
 
 interface ProposalFormProps {
   onSuccess?: () => void;
-  editingFile?: any;
+  editingFile?: FileRecord | null;
 }
 
 export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { pis, createPI } = usePIs();
   const { sponsors, createSponsor } = useSponsors();
+  const isEditing = !!editingFile;
 
   const form = useForm<ProposalFormData>({
     resolver: zodResolver(proposalFormSchema),
@@ -61,6 +63,29 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
       external_link: '',
     },
   });
+
+  // Load editing data when editingFile changes
+  useEffect(() => {
+    if (editingFile) {
+      form.reset({
+        db_no: editingFile.db_no,
+        pi_id: editingFile.pi_id,
+        sponsor_id: editingFile.sponsor_id,
+        status: editingFile.status,
+        cayuse: editingFile.cayuse || '',
+        notes: editingFile.notes || '',
+        external_link: editingFile.external_link || '',
+        date_received: editingFile.date_received ? new Date(editingFile.date_received) : undefined,
+      });
+    } else {
+      form.reset({
+        status: 'In',
+        cayuse: '',
+        notes: '',
+        external_link: '',
+      });
+    }
+  }, [editingFile, form]);
 
   const handleCreatePI = async (name: string) => {
     const newPI = await createPI(name);
@@ -86,9 +111,10 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
-        .from('files')
-        .insert([{
+      if (isEditing && editingFile) {
+        // Update existing proposal
+        const statusChanged = data.status !== editingFile.status;
+        const updateData: any = {
           db_no: data.db_no,
           pi_id: data.pi_id,
           sponsor_id: data.sponsor_id,
@@ -97,32 +123,87 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
           date_received: format(data.date_received, 'yyyy-MM-dd'),
           notes: data.notes || null,
           external_link: data.external_link || null,
-          date_status_change: new Date().toISOString(),
-        }]);
+          updated_at: new Date().toISOString(),
+        };
 
-      if (error) throw error;
+        // Only update date_status_change if status actually changed
+        if (statusChanged) {
+          updateData.date_status_change = new Date().toISOString();
+        }
 
-      toast.success('Proposal created successfully!');
-      form.reset();
+        const { error } = await supabase
+          .from('files')
+          .update(updateData)
+          .eq('id', editingFile.id);
+
+        if (error) throw error;
+        toast.success('Proposal updated successfully!');
+      } else {
+        // Create new proposal
+        const { error } = await supabase
+          .from('files')
+          .insert([{
+            db_no: data.db_no,
+            pi_id: data.pi_id,
+            sponsor_id: data.sponsor_id,
+            cayuse: data.cayuse || null,
+            status: data.status,
+            date_received: format(data.date_received, 'yyyy-MM-dd'),
+            notes: data.notes || null,
+            external_link: data.external_link || null,
+            date_status_change: new Date().toISOString(),
+          }]);
+
+        if (error) throw error;
+        toast.success('Proposal created successfully!');
+      }
+
       onSuccess?.();
     } catch (error: any) {
-      console.error('Error creating proposal:', error);
+      console.error('Error saving proposal:', error);
       if (error?.code === '23505') {
         toast.error('A proposal with this DB No. already exists');
       } else {
-        toast.error('Failed to create proposal. Please try again.');
+        toast.error(`Failed to ${isEditing ? 'update' : 'create'} proposal. Please try again.`);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleReset = () => {
+    if (isEditing && editingFile) {
+      // Reset to editing values
+      form.reset({
+        db_no: editingFile.db_no,
+        pi_id: editingFile.pi_id,
+        sponsor_id: editingFile.sponsor_id,
+        status: editingFile.status,
+        cayuse: editingFile.cayuse || '',
+        notes: editingFile.notes || '',
+        external_link: editingFile.external_link || '',
+        date_received: editingFile.date_received ? new Date(editingFile.date_received) : undefined,
+      });
+    } else {
+      // Reset to empty form
+      form.reset({
+        status: 'In',
+        cayuse: '',
+        notes: '',
+        external_link: '',
+      });
+    }
+  };
+
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Add New Proposal</CardTitle>
+        <CardTitle>{isEditing ? 'Edit Proposal' : 'Add New Proposal'}</CardTitle>
         <CardDescription>
-          Enter the details for a new proposal. Required fields are marked with *.
+          {isEditing 
+            ? 'Update the proposal details below. Required fields are marked with *.'
+            : 'Enter the details for a new proposal. Required fields are marked with *.'
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -272,15 +353,15 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
               className="flex-1"
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Proposal
+              {isEditing ? 'Save Changes' : 'Create Proposal'}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => form.reset()}
+              onClick={handleReset}
               disabled={isSubmitting}
             >
-              Clear Form
+              {isEditing ? 'Reset' : 'Clear Form'}
             </Button>
           </div>
         </form>
