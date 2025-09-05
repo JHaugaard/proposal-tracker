@@ -78,6 +78,7 @@ const Proposals = () => {
                 </DialogTitle>
               </DialogHeader>
               <ProposalForm 
+                key={editingFile?.id || 'new'}
                 onSuccess={handleFormSuccess} 
                 editingFile={editingFile}
               />
