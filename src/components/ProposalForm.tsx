@@ -67,11 +67,16 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
   // Load editing data when editingFile changes
   useEffect(() => {
     if (editingFile) {
+      // Normalize status to ensure it matches our options
+      const normalizedStatus = statusOptions.includes(editingFile.status as any) 
+        ? editingFile.status 
+        : 'In';
+      
       form.reset({
         db_no: editingFile.db_no,
         pi_id: editingFile.pi_id,
         sponsor_id: editingFile.sponsor_id,
-        status: editingFile.status,
+        status: normalizedStatus,
         cayuse: editingFile.cayuse || '',
         notes: editingFile.notes || '',
         external_link: editingFile.external_link || '',
@@ -225,7 +230,7 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
             <div className="space-y-2">
               <Label>Status</Label>
               <Select
-                value={form.watch('status')}
+                value={form.watch('status') || 'In'}
                 onValueChange={(value) => form.setValue('status', value as any)}
               >
                 <SelectTrigger>
