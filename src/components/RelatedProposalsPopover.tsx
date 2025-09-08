@@ -42,7 +42,7 @@ export function RelatedProposalsPopover({
   };
 
   const handleProposalClick = (proposalId: string) => {
-    navigate(`/files/${proposalId}`);
+    navigate(`/proposals/${proposalId}`);
     setOpen(false);
   };
 
@@ -83,7 +83,7 @@ export function RelatedProposalsPopover({
                       <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-medium truncate">
-                          DB {proposal.db_no}
+                          {proposal.db_no}
                         </div>
                         {entityType === 'pi' && (
                           <div className="text-xs text-muted-foreground truncate">
