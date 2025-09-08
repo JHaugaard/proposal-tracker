@@ -218,8 +218,16 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
               <Label htmlFor="db_no">DB No. *</Label>
               <Input
                 id="db_no"
-                {...form.register('db_no')}
-                placeholder="Enter DB number"
+                {...form.register('db_no', {
+                  setValueAs: (value) => {
+                    // Strip "DB " prefix if present (case insensitive)
+                    if (typeof value === 'string' && value.toUpperCase().startsWith('DB ')) {
+                      return value.substring(3).trim();
+                    }
+                    return value;
+                  }
+                })}
+                placeholder="e.g., 1001"
                 className={form.formState.errors.db_no ? 'border-destructive' : ''}
               />
               {form.formState.errors.db_no && (

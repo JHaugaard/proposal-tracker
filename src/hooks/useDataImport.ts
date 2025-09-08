@@ -333,13 +333,18 @@ export function useDataImport() {
 
       setImportProgress({ stage: 'Creating Files...', current: currentOperation, total: totalOperations });
 
-      // Insert Files
+      // Insert Files with normalized db_no (strip "DB " prefix)
       const fileInserts = filesData.map(file => {
         const piId = piNameToId.get(normalizeString(file.pi_name));
         const sponsorId = sponsorNameToId.get(normalizeString(file.sponsor_name));
+        
+        let normalizedDbNo = file.db_no;
+        if (typeof normalizedDbNo === 'string' && normalizedDbNo.toUpperCase().startsWith('DB ')) {
+          normalizedDbNo = normalizedDbNo.substring(3).trim();
+        }
 
         return {
-          db_no: file.db_no,
+          db_no: normalizedDbNo,
           status: file.status as any,
           pi_id: piId,
           sponsor_id: sponsorId,
