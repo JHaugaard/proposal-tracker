@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from 'lucide-react';
 import { FileRecord, SortField, SortDirection } from '@/hooks/useFiles';
 import { HighlightText } from './HighlightText';
+import { RelatedProposalsPopover } from './RelatedProposalsPopover';
 
 interface ProposalsTableProps {
   files: FileRecord[];
@@ -145,10 +146,26 @@ export function ProposalsTable({
               <HighlightText text={file.db_no} searchQuery={searchQuery} />
             </TableCell>
             <TableCell>
-              <HighlightText text={file.pi_name} searchQuery={searchQuery} />
+              <RelatedProposalsPopover
+                entityId={file.pi_id}
+                entityName={file.pi_name}
+                entityType="pi"
+              >
+                <button className="text-left hover:text-primary transition-colors">
+                  <HighlightText text={file.pi_name} searchQuery={searchQuery} />
+                </button>
+              </RelatedProposalsPopover>
             </TableCell>
             <TableCell>
-              <HighlightText text={file.sponsor_name} searchQuery={searchQuery} />
+              <RelatedProposalsPopover
+                entityId={file.sponsor_id}
+                entityName={file.sponsor_name}
+                entityType="sponsor"
+              >
+                <button className="text-left hover:text-primary transition-colors">
+                  <HighlightText text={file.sponsor_name} searchQuery={searchQuery} />
+                </button>
+              </RelatedProposalsPopover>
             </TableCell>
             <TableCell>
               <Select

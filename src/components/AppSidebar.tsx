@@ -28,7 +28,6 @@ const navigationItems = [
   { title: 'Proposals', url: '/proposals', icon: FileText },
   { title: 'PIs', url: '/pis', icon: Users },
   { title: 'Sponsors', url: '/sponsors', icon: Building2 },
-  { title: 'Import Data', url: '/import', icon: Edit },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 

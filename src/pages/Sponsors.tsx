@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 
 const Sponsors = () => {
   const { sponsors, loading, createSponsor, refetch } = useSponsors();
@@ -109,7 +110,15 @@ const Sponsors = () => {
                 <div key={sponsor.id} className="flex items-center space-x-3 p-3 border rounded-lg">
                   <Building2 className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
-                    <h3 className="font-medium">{sponsor.name}</h3>
+                    <RelatedProposalsPopover
+                      entityId={sponsor.id}
+                      entityName={sponsor.name}
+                      entityType="sponsor"
+                    >
+                      <button className="text-left hover:text-primary transition-colors">
+                        <h3 className="font-medium">{sponsor.name}</h3>
+                      </button>
+                    </RelatedProposalsPopover>
                   </div>
                 </div>
               ))}
