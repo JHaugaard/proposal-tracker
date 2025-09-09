@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { FileRecord } from '@/hooks/useFiles';
 import { ProposalForm } from '@/components/ProposalForm';
 import { FileAttachmentsManager } from '@/components/FileAttachmentsManager';
+import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -323,12 +324,28 @@ export default function FileDetail() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Principal Investigator</label>
-                  <p className="font-medium">{file.pi_name}</p>
+                  <label className="text-sm font-medium text-muted-foreground">PI</label>
+                  <RelatedProposalsPopover
+                    entityId={file.pi_id}
+                    entityName={file.pi_name}
+                    entityType="pi"
+                  >
+                    <button className="font-medium text-primary hover:underline text-left">
+                      {file.pi_name}
+                    </button>
+                  </RelatedProposalsPopover>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Sponsor</label>
-                  <p className="font-medium">{file.sponsor_name}</p>
+                  <RelatedProposalsPopover
+                    entityId={file.sponsor_id}
+                    entityName={file.sponsor_name}
+                    entityType="sponsor"
+                  >
+                    <button className="font-medium text-primary hover:underline text-left">
+                      {file.sponsor_name}
+                    </button>
+                  </RelatedProposalsPopover>
                 </div>
               </div>
 
