@@ -4,6 +4,8 @@ import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -13,15 +15,96 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = React.useState(props.month || new Date());
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const currentYear = currentMonth.getFullYear();
+  const years = Array.from({ length: 201 }, (_, i) => currentYear - 100 + i);
+
+  const handleMonthChange = (monthIndex: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(parseInt(monthIndex));
+    setCurrentMonth(newDate);
+    props.onMonthChange?.(newDate);
+  };
+
+  const handleYearChange = (year: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setFullYear(parseInt(year));
+    setCurrentMonth(newDate);
+    props.onMonthChange?.(newDate);
+  };
+
+  const handleTodayClick = () => {
+    const today = new Date();
+    setCurrentMonth(today);
+    props.onMonthChange?.(today);
+    if (props.mode === "single" && props.onSelect) {
+      (props.onSelect as any)(today, today, {}, {});
+    }
+  };
+
+  const CustomCaption = ({ displayMonth }: { displayMonth: Date }) => {
+    return (
+      <div className="flex justify-center items-center gap-2 py-2">
+        <Select value={displayMonth.getMonth().toString()} onValueChange={handleMonthChange}>
+          <SelectTrigger className="w-[110px] h-8">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month, index) => (
+              <SelectItem key={month} value={index.toString()}>
+                {month}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={displayMonth.getFullYear().toString()} onValueChange={handleYearChange}>
+          <SelectTrigger className="w-[80px] h-8">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  };
+
+  const CustomFooter = () => {
+    return (
+      <div className="flex justify-end p-3 pt-0">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleTodayClick}
+          className="h-8"
+        >
+          Today
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 pointer-events-auto", className)}
+      month={currentMonth}
+      onMonthChange={setCurrentMonth}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
+        caption_label: "hidden", // Hide default caption label
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -54,6 +137,8 @@ function Calendar({
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        Caption: CustomCaption,
+        Footer: CustomFooter,
       }}
       {...props}
     />
