@@ -48,7 +48,13 @@ export function useFiles() {
             pis!inner(name),
             sponsors!inner(name)
           `)
-          .order(sortField === 'pi_name' ? 'pis.name' : sortField === 'sponsor_name' ? 'sponsors.name' : sortField, { ascending: sortDirection === 'asc' })
+          .order(
+            sortField === 'db_no' ? 'created_at' : // Use created_at as fallback for db_no since we'll sort client-side
+            sortField === 'pi_name' ? 'pis.name' : 
+            sortField === 'sponsor_name' ? 'sponsors.name' : 
+            sortField, 
+            { ascending: sortDirection === 'asc' }
+          )
           .range(from, from + pageSize - 1);
         
         if (error) throw error;
@@ -67,6 +73,21 @@ export function useFiles() {
         pi_name: file.pis.name,
         sponsor_name: file.sponsors.name,
       }));
+
+      // Apply client-side sorting for db_no to handle numeric sorting properly
+      if (sortField === 'db_no') {
+        formattedFiles.sort((a, b) => {
+          const getNumericValue = (dbNo: string) => {
+            const match = dbNo.match(/^\d{1,4}/);
+            return match ? parseInt(match[0], 10) : 0;
+          };
+          
+          const aNum = getNumericValue(a.db_no);
+          const bNum = getNumericValue(b.db_no);
+          
+          return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+        });
+      }
 
       console.log(`Loaded ${formattedFiles.length} total proposals`);
       setFiles(formattedFiles);
