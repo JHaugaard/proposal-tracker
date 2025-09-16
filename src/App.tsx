@@ -32,7 +32,7 @@ const App = () => (
             <Route path="/pis" element={<ProtectedRoute><PIs /></ProtectedRoute>} />
             <Route path="/sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
             <Route path="/import" element={<ProtectedRoute><ImportData /></ProtectedRoute>} />
-            <Route path="/db-distiller" element={<ProtectedRoute><DBDistiller /></ProtectedRoute>} />
+            <Route path="/distiller" element={<ProtectedRoute><DBDistiller /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

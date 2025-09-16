@@ -1,27 +1,106 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Upload, FileSpreadsheet, Filter, Printer } from 'lucide-react';
+import { Printer, RotateCcw } from 'lucide-react';
+import { useAuth } from '@/components/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+import { FileUpload } from '@/components/distiller/FileUpload';
+import { StatusFilter } from '@/components/distiller/StatusFilter';
+import { DataTable } from '@/components/distiller/DataTable';
+import { useDistillerTimeout } from '@/hooks/useDistillerTimeout';
+
+import { processExcelFile, ProcessedData, ProposalRecord } from '@/utils/distiller/spreadsheetProcessor';
+import { filterRecords, getUniqueStatuses } from '@/utils/distiller/spreadsheetFilter';
 
 export default function DBDistiller() {
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
-    'OSRAA Review',
-    'Internal Docs/Info Requested',
-    'External Docs/Info Requested',
-    'Out for Review',
-    'Out for Signature'
-  ]);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
+  const [filteredRecords, setFilteredRecords] = useState<ProposalRecord[]>([]);
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ last_name?: string } | null>(null);
 
-  const statuses = [
-    'OSRAA Review',
-    'Internal Docs/Info Requested',
-    'External Docs/Info Requested',
-    'Out for Review',
-    'Out for Signature',
-    'Set-up in Process',
-    'Completed'
-  ];
+  // 5-minute timeout functionality
+  const handleTimeout = useCallback(() => {
+    setProcessedData(null);
+    setFilteredRecords([]);
+    setAvailableStatuses([]);
+    setSelectedStatuses([]);
+    toast({
+      title: "Session Expired",
+      description: "Data has been cleared for security after 5 minutes of inactivity.",
+      variant: "destructive"
+    });
+  }, [toast]);
+
+  const { resetTimeout, clearTimeout: clearDistillerTimeout } = useDistillerTimeout(handleTimeout);
+
+  // Load user profile
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('last_name')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          setUserProfile(data);
+        });
+    }
+  }, [user]);
+
+  // Filter records when criteria change
+  useEffect(() => {
+    if (processedData) {
+      const filtered = filterRecords(processedData.records, {
+        selectedStatuses,
+        userLastName: userProfile?.last_name
+      });
+      setFilteredRecords(filtered);
+      resetTimeout(); // Reset timeout on user activity
+    }
+  }, [processedData, selectedStatuses, userProfile, resetTimeout]);
+
+  const handleFileUpload = async (file: File) => {
+    setIsProcessing(true);
+    try {
+      const data = await processExcelFile(file);
+      setProcessedData(data);
+      
+      // Get unique statuses and select the default ones
+      const statuses = getUniqueStatuses(data.records);
+      setAvailableStatuses(statuses);
+      
+      // Default selected statuses from the original app
+      const defaultStatuses = [
+        'OSRAA Review',
+        'Internal Docs/Info Requested',
+        'External Docs/Info Requested',
+        'Out for Review',
+        'Out for Signature'
+      ].filter(status => statuses.some(s => s.toLowerCase().includes(status.toLowerCase())));
+      
+      setSelectedStatuses(defaultStatuses.length > 0 ? defaultStatuses : statuses);
+      resetTimeout();
+      
+      toast({
+        title: "File Processed Successfully",
+        description: `Loaded ${data.totalRecords} records from Excel file`
+      });
+    } catch (error) {
+      toast({
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process Excel file",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleStatusChange = (status: string, checked: boolean) => {
     if (checked) {
@@ -32,11 +111,23 @@ export default function DBDistiller() {
   };
 
   const handleSelectAll = () => {
-    setSelectedStatuses([...statuses]);
+    setSelectedStatuses([...availableStatuses]);
   };
 
   const handleClearAll = () => {
     setSelectedStatuses([]);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleReUpload = () => {
+    setProcessedData(null);
+    setFilteredRecords([]);
+    setAvailableStatuses([]);
+    setSelectedStatuses([]);
+    clearDistillerTimeout();
   };
 
   return (
@@ -49,111 +140,91 @@ export default function DBDistiller() {
           <p className="text-sm text-muted-foreground">
             Drop in the FY26 Sponsored Agreements DB as an Excel Spreadsheet. Choose the Statuses you want to show. Check/Uncheck to update.
           </p>
+          {userProfile?.last_name && (
+            <p className="text-sm text-blue-600">
+              Filtering by PI last name: "{userProfile.last_name}"
+            </p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* File Upload Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                DB as Excel Spreadsheet
-              </CardTitle>
-              <CardDescription>
-                Drop your FY26 Sponsored Agreements DataBase.xlsx file here or click to browse
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
-                <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Drop your file here or click to browse
+        {!processedData ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* File Upload Section */}
+            <FileUpload onFileUpload={handleFileUpload} isProcessing={isProcessing} />
+
+            {/* Placeholder for Status Filter */}
+            <StatusFilter
+              statuses={[
+                'OSRAA Review',
+                'Internal Docs/Info Requested',
+                'External Docs/Info Requested',
+                'Out for Review',
+                'Out for Signature',
+                'Set-up in Process',
+                'Completed'
+              ]}
+              selectedStatuses={[
+                'OSRAA Review',
+                'Internal Docs/Info Requested',
+                'External Docs/Info Requested',
+                'Out for Review',
+                'Out for Signature'
+              ]}
+              onStatusChange={() => {}}
+              onSelectAll={() => {}}
+              onClearAll={() => {}}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* File Info Section */}
+              <div className="text-center p-6 bg-muted/50 rounded-lg">
+                <h3 className="font-semibold mb-2">File Loaded</h3>
+                <p className="text-sm text-muted-foreground">
+                  {processedData.totalRecords} records processed
                 </p>
-                <Button variant="outline">
-                  Select File
-                </Button>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Loaded at: {new Date(processedData.processedAt).toLocaleString()}
+                </p>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Status Filter Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filter by Status
-              </CardTitle>
-              <CardDescription>
-                Select statuses to include when distilling the DB. ({selectedStatuses.length} of {statuses.length} selected)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSelectAll}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleClearAll}
-                >
-                  Clear All
-                </Button>
-              </div>
-              
-              <div className="space-y-3">
-                {statuses.map((status) => (
-                  <div key={status} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={status}
-                      checked={selectedStatuses.includes(status)}
-                      onCheckedChange={(checked) => 
-                        handleStatusChange(status, checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor={status}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {status}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Placeholder for Data Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtered Results</CardTitle>
-            <CardDescription>
-              Your filtered spreadsheet data will appear here once a file is uploaded
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <div className="text-center">
-                <FileSpreadsheet className="mx-auto h-12 w-12 mb-4" />
-                <p>No spreadsheet loaded yet</p>
-                <p className="text-sm">Upload an Excel file to see filtered results</p>
-              </div>
+              {/* Status Filter Section */}
+              <StatusFilter
+                statuses={availableStatuses}
+                selectedStatuses={selectedStatuses}
+                onStatusChange={handleStatusChange}
+                onSelectAll={handleSelectAll}
+                onClearAll={handleClearAll}
+              />
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Data Table */}
+            <DataTable 
+              records={filteredRecords} 
+              totalRecords={processedData.totalRecords}
+              isLoading={isProcessing}
+            />
+          </>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handlePrint}
+            disabled={!processedData || filteredRecords.length === 0}
+          >
             <Printer className="h-4 w-4" />
             Print
           </Button>
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={handleReUpload}
+          >
+            <RotateCcw className="h-4 w-4" />
             Re-upload Spreadsheet
           </Button>
         </div>

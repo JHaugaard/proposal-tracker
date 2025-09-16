@@ -34,7 +34,7 @@ const navigationItems = [
   { title: 'Proposals', url: '/proposals', icon: FileText },
   { title: 'PIs', url: '/pis', icon: Users },
   { title: 'Sponsors', url: '/sponsors', icon: Building2 },
-  { title: 'DB Distiller', url: '/db-distiller', icon: Zap },
+  { title: 'DB Distiller', url: '/distiller', icon: Zap },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
