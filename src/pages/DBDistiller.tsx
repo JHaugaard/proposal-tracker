@@ -142,7 +142,7 @@ export default function DBDistiller() {
           </p>
           {userProfile?.last_name && (
             <p className="text-sm text-blue-600">
-              Filtering by PI last name: "{userProfile.last_name}"
+              Filtering by GCO/GCA/SCCO: "{userProfile.last_name}"
             </p>
           )}
         </div>

@@ -17,10 +17,10 @@ export function filterRecords(records: ProposalRecord[], options: FilterOptions)
     );
   }
   
-  // Filter by PI last name if provided
+  // Filter by GCO/GCA/SCCO column if provided (exact match)
   if (options.userLastName) {
     filtered = filtered.filter(record =>
-      record.pi_name.toLowerCase().includes(options.userLastName!.toLowerCase())
+      record.gco_gca_scco === options.userLastName
     );
   }
   

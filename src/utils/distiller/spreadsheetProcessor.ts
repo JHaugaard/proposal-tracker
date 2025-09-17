@@ -5,6 +5,7 @@ export interface ProposalRecord {
   pi_name: string;
   sponsor_name: string;
   status: string;
+  gco_gca_scco?: string;
   date_received?: string;
   to_set_up?: string;
   cayuse?: string;
@@ -24,6 +25,7 @@ const COLUMN_MAPPINGS = {
   pi_name: ['pi_name', 'pi name', 'principal investigator', 'pi', 'investigator'],
   sponsor_name: ['sponsor_name', 'sponsor name', 'sponsor', 'funding agency'],
   status: ['status', 'proposal status', 'current status'],
+  gco_gca_scco: ['gco/gca/scco', 'gco', 'gca', 'scco', 'gco gca scco', 'gco_gca_scco'],
   date_received: ['date_received', 'date received', 'received date', 'submission date'],
   to_set_up: ['to_set_up', 'to set up', 'setup date', 'due date'],
   cayuse: ['cayuse', 'cayuse number', 'cayuse id'],
@@ -57,6 +59,10 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
         // Create column mapping
         const columnMap = createColumnMapping(headers);
         
+        // Log column mapping for debugging
+        console.log('Column mapping detected:', columnMap);
+        console.log('GCO/GCA/SCCO column found at index:', columnMap.gco_gca_scco);
+        
         // Process each row
         const records: ProposalRecord[] = dataRows
           .filter(row => Array.isArray(row) && row.some(cell => cell !== null && cell !== undefined && cell !== ''))
@@ -66,6 +72,7 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
               pi_name: getCellValue(row, columnMap.pi_name) || '',
               sponsor_name: getCellValue(row, columnMap.sponsor_name) || '',
               status: getCellValue(row, columnMap.status) || '',
+              gco_gca_scco: getCellValue(row, columnMap.gco_gca_scco),
               date_received: formatDate(getCellValue(row, columnMap.date_received)),
               to_set_up: formatDate(getCellValue(row, columnMap.to_set_up)),
               cayuse: getCellValue(row, columnMap.cayuse),
