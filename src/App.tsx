@@ -26,7 +26,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* TEMPORARY: All routes bypass authentication */}
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
             <Route path="/proposals/:id" element={<ProtectedRoute><FileDetail /></ProtectedRoute>} />
