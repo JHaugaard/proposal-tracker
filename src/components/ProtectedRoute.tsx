@@ -1,35 +1,23 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/components/AuthContext';
 import { AppLayout } from '@/components/AppLayout';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-lg text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  return <AppLayout>{children}</AppLayout>;
+  // TEMPORARY: Authentication disabled for emergency access
+  return (
+    <AppLayout>
+      <Alert className="mb-4 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+        <AlertTriangle className="h-4 w-4 text-orange-600" />
+        <AlertDescription className="text-orange-800 dark:text-orange-200">
+          <strong>⚠️ Authentication Temporarily Disabled</strong> - All security checks are bypassed. 
+          Please re-enable authentication by restoring the original ProtectedRoute component once you regain access.
+        </AlertDescription>
+      </Alert>
+      {children}
+    </AppLayout>
+  );
 }
