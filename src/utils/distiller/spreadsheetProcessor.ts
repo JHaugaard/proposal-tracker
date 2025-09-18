@@ -10,6 +10,8 @@ export interface ProposalRecord {
   to_set_up?: string;
   cayuse?: string;
   notes?: string;
+  status_date?: string;
+  old_db?: string;
 }
 
 export interface ProcessedData {
@@ -21,15 +23,17 @@ export interface ProcessedData {
 
 // Column mapping for different possible Excel headers
 const COLUMN_MAPPINGS = {
-  db_no: ['db_no', 'db no', 'database number', 'db#', 'proposal number'],
+  db_no: ['db_no', 'db no', 'database number', 'db#', 'proposal number', 'id'],
   pi_name: ['pi_name', 'pi name', 'principal investigator', 'pi', 'investigator'],
-  sponsor_name: ['sponsor_name', 'sponsor name', 'sponsor', 'funding agency'],
+  sponsor_name: ['sponsor_name', 'sponsor name', 'sponsor', 'funding agency', 'sponsor/contractor'],
   status: ['status', 'proposal status', 'current status'],
   gco_gca_scco: ['gco/gca/scco', 'gco', 'gca', 'scco', 'gco gca scco', 'gco_gca_scco'],
   date_received: ['date_received', 'date received', 'received date', 'submission date'],
   to_set_up: ['to_set_up', 'to set up', 'setup date', 'due date'],
   cayuse: ['cayuse', 'cayuse number', 'cayuse id'],
-  notes: ['notes', 'comments', 'remarks']
+  notes: ['notes', 'comments', 'remarks'],
+  status_date: ['status_date', 'status date', 'date status', 'status changed'],
+  old_db: ['old_db', 'old db', 'old database', 'old db#', 'previous db']
 };
 
 export function processExcelFile(file: File): Promise<ProcessedData> {
@@ -76,7 +80,9 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
               date_received: formatDate(getCellValue(row, columnMap.date_received)),
               to_set_up: formatDate(getCellValue(row, columnMap.to_set_up)),
               cayuse: getCellValue(row, columnMap.cayuse),
-              notes: getCellValue(row, columnMap.notes)
+              notes: getCellValue(row, columnMap.notes),
+              status_date: formatDate(getCellValue(row, columnMap.status_date)),
+              old_db: getCellValue(row, columnMap.old_db)
             };
             return record;
           })

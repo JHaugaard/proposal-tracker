@@ -22,8 +22,6 @@ export default function DBDistiller() {
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [userProfile, setUserProfile] = useState<{ last_name?: string } | null>(null);
-
   // 5-minute timeout functionality
   const handleTimeout = useCallback(() => {
     setProcessedData(null);
@@ -39,31 +37,16 @@ export default function DBDistiller() {
 
   const { resetTimeout, clearTimeout: clearDistillerTimeout } = useDistillerTimeout(handleTimeout);
 
-  // Load user profile
-  useEffect(() => {
-    if (user) {
-      supabase
-        .from('profiles')
-        .select('last_name')
-        .eq('user_id', user.id)
-        .single()
-        .then(({ data }) => {
-          setUserProfile(data);
-        });
-    }
-  }, [user]);
-
   // Filter records when criteria change
   useEffect(() => {
     if (processedData) {
       const filtered = filterRecords(processedData.records, {
-        selectedStatuses,
-        userLastName: userProfile?.last_name
+        selectedStatuses
       });
       setFilteredRecords(filtered);
       resetTimeout(); // Reset timeout on user activity
     }
-  }, [processedData, selectedStatuses, userProfile, resetTimeout]);
+  }, [processedData, selectedStatuses, resetTimeout]);
 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true);
@@ -75,14 +58,14 @@ export default function DBDistiller() {
       const statuses = getUniqueStatuses(data.records);
       setAvailableStatuses(statuses);
       
-      // Default selected statuses from the original app
+      // Default selected statuses - exact matches only
       const defaultStatuses = [
-        'OSRAA Review',
+        'OSSRA Review',
         'Internal Docs/Info Requested',
         'External Docs/Info Requested',
         'Out for Review',
         'Out for Signature'
-      ].filter(status => statuses.some(s => s.toLowerCase().includes(status.toLowerCase())));
+      ].filter(status => statuses.includes(status));
       
       setSelectedStatuses(defaultStatuses.length > 0 ? defaultStatuses : statuses);
       resetTimeout();
@@ -140,11 +123,9 @@ export default function DBDistiller() {
           <p className="text-sm text-muted-foreground">
             Drop in the FY26 Sponsored Agreements DB as an Excel Spreadsheet. Choose the Statuses you want to show. Check/Uncheck to update.
           </p>
-          {userProfile?.last_name && (
-            <p className="text-sm text-blue-600">
-              Filtering by GCO/GCA/SCCO: "{userProfile.last_name}"
-            </p>
-          )}
+          <p className="text-sm text-blue-600">
+            Filtering by GCO/GCA/SCCO: "Haugaard"
+          </p>
         </div>
 
         {!processedData ? (
@@ -155,16 +136,14 @@ export default function DBDistiller() {
             {/* Placeholder for Status Filter */}
             <StatusFilter
               statuses={[
-                'OSRAA Review',
+                'OSSRA Review',
                 'Internal Docs/Info Requested',
                 'External Docs/Info Requested',
                 'Out for Review',
-                'Out for Signature',
-                'Set-up in Process',
-                'Completed'
+                'Out for Signature'
               ]}
               selectedStatuses={[
-                'OSRAA Review',
+                'OSSRA Review',
                 'Internal Docs/Info Requested',
                 'External Docs/Info Requested',
                 'Out for Review',

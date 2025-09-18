@@ -55,33 +55,31 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b">
-                <th className="text-left p-2 font-medium">DB No</th>
-                <th className="text-left p-2 font-medium">PI Name</th>
-                <th className="text-left p-2 font-medium">Sponsor</th>
-                <th className="text-left p-2 font-medium">Status</th>
+                <th className="text-left p-2 font-medium">ID</th>
                 <th className="text-left p-2 font-medium">Date Received</th>
-                <th className="text-left p-2 font-medium">To Set Up</th>
-                <th className="text-left p-2 font-medium">Cayuse</th>
-                <th className="text-left p-2 font-medium">Notes</th>
+                <th className="text-left p-2 font-medium">Principal Investigator</th>
+                <th className="text-left p-2 font-medium">Sponsor/Contractor</th>
+                <th className="text-left p-2 font-medium">Cayuse ID</th>
+                <th className="text-left p-2 font-medium">Status</th>
+                <th className="text-left p-2 font-medium">Status Date</th>
+                <th className="text-left p-2 font-medium">Old DB#</th>
               </tr>
             </thead>
             <tbody>
               {records.map((record, index) => (
                 <tr key={index} className="border-b hover:bg-muted/50">
                   <td className="p-2 font-mono text-sm">{record.db_no}</td>
+                  <td className="p-2 text-sm">{record.date_received || '-'}</td>
                   <td className="p-2">{record.pi_name}</td>
                   <td className="p-2">{record.sponsor_name}</td>
+                  <td className="p-2 text-sm">{record.cayuse || '-'}</td>
                   <td className="p-2">
                     <Badge variant="secondary" className={getStatusColor(record.status)}>
                       {record.status}
                     </Badge>
                   </td>
-                  <td className="p-2 text-sm">{record.date_received || '-'}</td>
-                  <td className="p-2 text-sm">{record.to_set_up || '-'}</td>
-                  <td className="p-2 text-sm">{record.cayuse || '-'}</td>
-                  <td className="p-2 text-sm max-w-xs truncate" title={record.notes}>
-                    {record.notes || '-'}
-                  </td>
+                  <td className="p-2 text-sm">{record.status_date || '-'}</td>
+                  <td className="p-2 text-sm">{record.old_db || '-'}</td>
                 </tr>
               ))}
             </tbody>

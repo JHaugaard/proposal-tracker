@@ -2,25 +2,20 @@ import { ProposalRecord } from './spreadsheetProcessor';
 
 export interface FilterOptions {
   selectedStatuses: string[];
-  userLastName?: string;
 }
 
 export function filterRecords(records: ProposalRecord[], options: FilterOptions): ProposalRecord[] {
   let filtered = records;
   
-  // Filter by status
+  // First filter by GCO/GCA/SCCO (hard-coded to "Haugaard")
+  filtered = filtered.filter(record =>
+    record.gco_gca_scco === "Haugaard"
+  );
+  
+  // Then filter by status (exact match only)
   if (options.selectedStatuses.length > 0) {
     filtered = filtered.filter(record => 
-      options.selectedStatuses.some(status => 
-        record.status.toLowerCase().includes(status.toLowerCase())
-      )
-    );
-  }
-  
-  // Filter by GCO/GCA/SCCO column if provided (exact match)
-  if (options.userLastName) {
-    filtered = filtered.filter(record =>
-      record.gco_gca_scco === options.userLastName
+      options.selectedStatuses.includes(record.status)
     );
   }
   
