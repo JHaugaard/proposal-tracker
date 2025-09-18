@@ -49,6 +49,7 @@ export function AppSidebar() {
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || '');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -99,11 +100,11 @@ export function AppSidebar() {
 
       if (error) throw error;
 
+      setResetEmailSent(true);
       toast({
         title: "Password Reset Sent",
         description: "Check your email for password reset instructions.",
       });
-      setIsChangePasswordOpen(false);
     } catch (error) {
       console.error('Error sending password reset:', error);
       toast({
@@ -114,6 +115,11 @@ export function AppSidebar() {
     } finally {
       setIsSendingReset(false);
     }
+  };
+
+  const handleClosePasswordDialog = () => {
+    setIsChangePasswordOpen(false);
+    setResetEmailSent(false);
   };
 
   return (
@@ -194,7 +200,7 @@ export function AppSidebar() {
                   </DialogContent>
                 </Dialog>
                 
-                <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+                <Dialog open={isChangePasswordOpen} onOpenChange={handleClosePasswordDialog}>
                   <DialogTrigger asChild>
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       <Key className="h-4 w-4 mr-2" />
@@ -205,29 +211,54 @@ export function AppSidebar() {
                     <DialogHeader>
                       <DialogTitle>Change Password</DialogTitle>
                       <DialogDescription>
-                        We'll send you a password reset link to your email address.
+                        {resetEmailSent 
+                          ? "Password reset email has been sent successfully!"
+                          : "We'll send you a password reset link to your email address."
+                        }
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4">
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input value={user?.email || ''} disabled />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsChangePasswordOpen(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={handleChangePassword}
-                        disabled={isSendingReset}
-                      >
-                        {isSendingReset ? 'Sending...' : 'Send Reset Link'}
-                      </Button>
-                    </DialogFooter>
+                    {!resetEmailSent ? (
+                      <>
+                        <div className="py-4">
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input value={user?.email || ''} disabled />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={handleClosePasswordDialog}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleChangePassword}
+                            disabled={isSendingReset}
+                          >
+                            {isSendingReset ? 'Sending...' : 'Send Reset Link'}
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    ) : (
+                      <>
+                        <div className="py-4">
+                          <div className="text-center space-y-2">
+                            <p className="text-sm text-muted-foreground">
+                              Check your email at <strong>{user?.email}</strong> for password reset instructions.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              If you don't see the email, check your spam folder.
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleClosePasswordDialog}>
+                            Close
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    )}
                   </DialogContent>
                 </Dialog>
                 <DropdownMenuSeparator />
