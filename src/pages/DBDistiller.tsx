@@ -13,6 +13,25 @@ import { useDistillerTimeout } from '@/hooks/useDistillerTimeout';
 import { processExcelFile, ProcessedData, ProposalRecord } from '@/utils/distiller/spreadsheetProcessor';
 import { filterRecords, getUniqueStatuses } from '@/utils/distiller/spreadsheetFilter';
 
+// Fixed 7 statuses based on UI requirements
+const FIXED_STATUSES = [
+  'In',
+  'Pending',
+  'Pending Signatures',
+  'Set-up in Process',
+  'OSRAA Review',
+  'Completed',
+  'Withdrawn'
+];
+
+// Default selected statuses (4 out of 7 based on Active screenshot)
+const DEFAULT_SELECTED_STATUSES = [
+  'In',
+  'Pending',
+  'Pending Signatures',
+  'Set-up in Process'
+];
+
 export default function DBDistiller() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -54,20 +73,11 @@ export default function DBDistiller() {
       const data = await processExcelFile(file);
       setProcessedData(data);
       
-      // Get unique statuses and select the default ones
-      const statuses = getUniqueStatuses(data.records);
-      setAvailableStatuses(statuses);
+      // Use fixed 7 statuses instead of dynamic extraction
+      setAvailableStatuses(FIXED_STATUSES);
       
-      // Default selected statuses - exact matches only
-      const defaultStatuses = [
-        'OSSRA Review',
-        'Internal Docs/Info Requested',
-        'External Docs/Info Requested',
-        'Out for Review',
-        'Out for Signature'
-      ].filter(status => statuses.includes(status));
-      
-      setSelectedStatuses(defaultStatuses.length > 0 ? defaultStatuses : statuses);
+      // Set default selected statuses
+      setSelectedStatuses(DEFAULT_SELECTED_STATUSES);
       resetTimeout();
       
       toast({
@@ -135,20 +145,8 @@ export default function DBDistiller() {
 
             {/* Placeholder for Status Filter */}
             <StatusFilter
-              statuses={[
-                'OSSRA Review',
-                'Internal Docs/Info Requested',
-                'External Docs/Info Requested',
-                'Out for Review',
-                'Out for Signature'
-              ]}
-              selectedStatuses={[
-                'OSSRA Review',
-                'Internal Docs/Info Requested',
-                'External Docs/Info Requested',
-                'Out for Review',
-                'Out for Signature'
-              ]}
+              statuses={FIXED_STATUSES}
+              selectedStatuses={DEFAULT_SELECTED_STATUSES}
               onStatusChange={() => {}}
               onSelectAll={() => {}}
               onClearAll={() => {}}
@@ -170,7 +168,7 @@ export default function DBDistiller() {
 
               {/* Status Filter Section */}
               <StatusFilter
-                statuses={availableStatuses}
+                statuses={FIXED_STATUSES}
                 selectedStatuses={selectedStatuses}
                 onStatusChange={handleStatusChange}
                 onSelectAll={handleSelectAll}
