@@ -50,8 +50,8 @@ export function AutocompleteInput({
     item.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const showCreateOption = onCreate && searchValue && 
-    !filteredItems.some(item => item.name.toLowerCase() === searchValue.toLowerCase());
+  const showCreateOption = onCreate && searchValue.trim() && 
+    !filteredItems.some(item => item.name.toLowerCase() === searchValue.toLowerCase().trim());
 
   const handleCreate = async () => {
     if (onCreate && searchValue) {
@@ -75,7 +75,7 @@ export function AutocompleteInput({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 bg-popover border shadow-md z-50" align="start">
         <Command>
           <CommandInput 
             placeholder={`Search ${placeholder.toLowerCase()}...`}
@@ -83,13 +83,18 @@ export function AutocompleteInput({
             onValueChange={setSearchValue}
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            {filteredItems.length === 0 && !showCreateOption ? (
+              <CommandEmpty>
+                {searchValue ? `No results found for "${searchValue}".` : "Start typing to search..."}
+              </CommandEmpty>
+            ) : null}
             <CommandGroup>
               {filteredItems.map((item) => (
                 <CommandItem
                   key={item.id}
                   value={item.id}
                   onSelect={() => {
+                    console.log('Selected item:', item.name, item.id);
                     onSelect(item.id);
                     setOpen(false);
                     setSearchValue('');
@@ -105,8 +110,11 @@ export function AutocompleteInput({
                 </CommandItem>
               ))}
               {showCreateOption && (
-                <CommandItem onSelect={handleCreate}>
-                  <Plus className="mr-2 h-4 w-4" />
+                <CommandItem 
+                  onSelect={handleCreate}
+                  className="bg-muted/50 border-t font-medium text-primary hover:bg-primary/10"
+                >
+                  <Plus className="mr-2 h-4 w-4 text-primary" />
                   {createLabel} "{searchValue}"
                 </CommandItem>
               )}

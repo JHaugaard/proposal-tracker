@@ -93,21 +93,37 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
   }, [editingFile, form]);
 
   const handleCreatePI = async (name: string) => {
-    const newPI = await createPI(name);
-    if (newPI) {
-      form.setValue('pi_id', newPI.id);
-      toast.success(`PI "${name}" created successfully`);
-    } else {
+    console.log('Creating PI:', name);
+    try {
+      const newPI = await createPI(name);
+      if (newPI) {
+        form.setValue('pi_id', newPI.id);
+        toast.success(`PI "${name}" created successfully`);
+        console.log('PI created successfully:', newPI);
+      } else {
+        console.log('Failed to create PI - no return value');
+        toast.error('Failed to create PI');
+      }
+    } catch (error) {
+      console.error('Error creating PI:', error);
       toast.error('Failed to create PI');
     }
   };
 
   const handleCreateSponsor = async (name: string) => {
-    const newSponsor = await createSponsor(name);
-    if (newSponsor) {
-      form.setValue('sponsor_id', newSponsor.id);
-      toast.success(`Sponsor "${name}" created successfully`);
-    } else {
+    console.log('Creating Sponsor:', name);
+    try {
+      const newSponsor = await createSponsor(name);
+      if (newSponsor) {
+        form.setValue('sponsor_id', newSponsor.id);
+        toast.success(`Sponsor "${name}" created successfully`);
+        console.log('Sponsor created successfully:', newSponsor);
+      } else {
+        console.log('Failed to create Sponsor - no return value');
+        toast.error('Failed to create sponsor');
+      }
+    } catch (error) {
+      console.error('Error creating sponsor:', error);
       toast.error('Failed to create sponsor');
     }
   };
