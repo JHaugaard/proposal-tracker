@@ -144,7 +144,8 @@ export function AppSidebar() {
       }
 
       console.log('Current session valid, attempting password update...');
-      const { error } = await updatePassword(newPassword);
+      const result = await updatePassword(newPassword);
+      const { error } = result;
 
       if (error) {
         console.error('Password update failed:', error);

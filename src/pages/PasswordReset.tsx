@@ -23,8 +23,10 @@ const PasswordReset = () => {
     const refreshToken = searchParams.get('refresh_token');
     const type = searchParams.get('type');
 
+    console.log('Password reset page - URL params:', { type, accessToken: !!accessToken, refreshToken: !!refreshToken });
+
     if (type === 'recovery' && accessToken && refreshToken) {
-      // Set the session with the tokens from the URL
+      // Set the session with the tokens from the URL but don't redirect
       supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -38,10 +40,12 @@ const PasswordReset = () => {
           });
           navigate('/auth');
         } else {
+          console.log('Session set successfully for password reset');
           setValidToken(true);
         }
       });
     } else {
+      console.log('Invalid reset link - missing required parameters');
       toast({
         title: "Invalid Reset Link",
         description: "This password reset link is invalid or has expired.",
@@ -75,6 +79,7 @@ const PasswordReset = () => {
     setLoading(true);
 
     try {
+      console.log('Attempting password update...');
       const { error } = await supabase.auth.updateUser({
         password: password
       });
@@ -87,11 +92,14 @@ const PasswordReset = () => {
           variant: "destructive",
         });
       } else {
+        console.log('Password updated successfully');
         toast({
           title: "Success",
-          description: "Your password has been updated successfully.",
+          description: "Your password has been updated successfully. You can now sign in with your new password.",
         });
-        navigate('/');
+        // Sign out after password reset to force fresh login
+        await supabase.auth.signOut();
+        navigate('/auth');
       }
     } catch (err) {
       console.error('Unexpected error:', err);
