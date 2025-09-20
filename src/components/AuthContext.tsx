@@ -81,26 +81,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updatePassword = async (currentPassword: string, newPassword: string) => {
-    if (!user?.email) {
-      return { error: { message: 'No user found' } };
+    if (!user) {
+      return { error: { message: 'No authenticated user found' } };
     }
 
-    // First verify the current password by attempting to sign in
-    const { error: verifyError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: currentPassword,
-    });
+    try {
+      // For authenticated users, Supabase handles password updates directly
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
 
-    if (verifyError) {
-      return { error: { message: 'Current password is incorrect' } };
+      if (error) {
+        console.error('Password update error:', error);
+        return { error: { message: error.message || 'Failed to update password' } };
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error('Unexpected error during password update:', err);
+      return { error: { message: 'An unexpected error occurred' } };
     }
-
-    // Update the password
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-
-    return { error };
   };
 
   const value = {
