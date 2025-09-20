@@ -52,7 +52,6 @@ export function AppSidebar() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   
   // Direct password change states
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -99,7 +98,9 @@ export function AppSidebar() {
   };
 
   const handleDirectPasswordChange = async () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    console.log('Password change attempt started');
+    
+    if (!newPassword || !confirmPassword) {
       toast({
         title: "Error",
         description: "Please fill in all password fields.",
@@ -128,10 +129,14 @@ export function AppSidebar() {
 
     setIsChangingPassword(true);
     try {
-      const { error } = await updatePassword(currentPassword, newPassword);
+      const { error } = await updatePassword(newPassword);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Password update failed:', error);
+        throw error;
+      }
 
+      console.log('Password changed successfully');
       toast({
         title: "Success",
         description: "Password changed successfully.",
@@ -179,7 +184,6 @@ export function AppSidebar() {
     setIsChangePasswordOpen(false);
     setResetEmailSent(false);
     setShowDirectChange(true);
-    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
   };
@@ -272,14 +276,14 @@ export function AppSidebar() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Change Password</DialogTitle>
-                      <DialogDescription>
-                        {resetEmailSent 
-                          ? "Password reset email has been sent successfully!"
-                          : showDirectChange 
-                            ? "Enter your current password and choose a new one."
-                            : "We'll send you a password reset link to your email address."
-                        }
-                      </DialogDescription>
+                       <DialogDescription>
+                         {resetEmailSent 
+                           ? "Password reset email has been sent successfully!"
+                           : showDirectChange 
+                             ? "Choose a new password for your account."
+                             : "We'll send you a password reset link to your email address."
+                         }
+                       </DialogDescription>
                     </DialogHeader>
                     
                     {resetEmailSent ? (
@@ -301,39 +305,29 @@ export function AppSidebar() {
                         </DialogFooter>
                       </>
                     ) : showDirectChange ? (
-                      <>
-                        <div className="py-4 space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="current-password">Current Password</Label>
-                            <Input
-                              id="current-password"
-                              type="password"
-                              value={currentPassword}
-                              onChange={(e) => setCurrentPassword(e.target.value)}
-                              placeholder="Enter your current password"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="new-password">New Password</Label>
-                            <Input
-                              id="new-password"
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              placeholder="Enter your new password"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="confirm-password">Confirm New Password</Label>
-                            <Input
-                              id="confirm-password"
-                              type="password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              placeholder="Confirm your new password"
-                            />
-                          </div>
-                        </div>
+                       <>
+                         <div className="py-4 space-y-4">
+                           <div className="space-y-2">
+                             <Label htmlFor="new-password">New Password</Label>
+                             <Input
+                               id="new-password"
+                               type="password"
+                               value={newPassword}
+                               onChange={(e) => setNewPassword(e.target.value)}
+                               placeholder="Enter your new password"
+                             />
+                           </div>
+                           <div className="space-y-2">
+                             <Label htmlFor="confirm-password">Confirm New Password</Label>
+                             <Input
+                               id="confirm-password"
+                               type="password"
+                               value={confirmPassword}
+                               onChange={(e) => setConfirmPassword(e.target.value)}
+                               placeholder="Confirm your new password"
+                             />
+                           </div>
+                         </div>
                         <DialogFooter>
                           <Button
                             variant="outline"

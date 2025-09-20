@@ -10,7 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
-  updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,13 +80,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const updatePassword = async (currentPassword: string, newPassword: string) => {
+  const updatePassword = async (newPassword: string) => {
+    console.log('Starting password update for user:', user?.id);
+    
     if (!user) {
+      console.error('No authenticated user found');
       return { error: { message: 'No authenticated user found' } };
     }
 
+    if (!session) {
+      console.error('No active session found');
+      return { error: { message: 'No active session found' } };
+    }
+
     try {
-      // For authenticated users, Supabase handles password updates directly
+      console.log('Attempting to update password...');
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -96,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: { message: error.message || 'Failed to update password' } };
       }
 
+      console.log('Password updated successfully');
       return { error: null };
     } catch (err) {
       console.error('Unexpected error during password update:', err);
