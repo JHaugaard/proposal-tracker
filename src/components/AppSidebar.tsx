@@ -128,7 +128,22 @@ export function AppSidebar() {
     }
 
     setIsChangingPassword(true);
+    
     try {
+      // Ensure we have a valid session before attempting password change
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        console.error('No valid session found');
+        toast({
+          title: "Session Expired",
+          description: "Please sign out and sign back in to change your password.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Current session valid, attempting password update...');
       const { error } = await updatePassword(newPassword);
 
       if (error) {

@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import ImportData from "./pages/ImportData";
 import DBDistiller from "./pages/DBDistiller";
 import NotFound from "./pages/NotFound";
+import PasswordReset from "./pages/PasswordReset";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/distiller" element={<ProtectedRoute><DBDistiller /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
