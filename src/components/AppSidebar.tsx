@@ -40,7 +40,7 @@ const navigationItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { user, signOut, resetPassword } = useAuth();
+  const { user, signOut, resetPassword, updatePassword } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const { toast } = useToast();
@@ -50,6 +50,13 @@ export function AppSidebar() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  
+  // Direct password change states
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showDirectChange, setShowDirectChange] = useState(true);
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -91,7 +98,58 @@ export function AppSidebar() {
     }
   };
 
-  const handleChangePassword = async () => {
+  const handleDirectPasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all password fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords don't match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const { error } = await updatePassword(currentPassword, newPassword);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password changed successfully.",
+      });
+      handleClosePasswordDialog();
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleSendResetEmail = async () => {
     if (!user?.email) return;
     
     setIsSendingReset(true);
@@ -120,6 +178,10 @@ export function AppSidebar() {
   const handleClosePasswordDialog = () => {
     setIsChangePasswordOpen(false);
     setResetEmailSent(false);
+    setShowDirectChange(true);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -213,34 +275,14 @@ export function AppSidebar() {
                       <DialogDescription>
                         {resetEmailSent 
                           ? "Password reset email has been sent successfully!"
-                          : "We'll send you a password reset link to your email address."
+                          : showDirectChange 
+                            ? "Enter your current password and choose a new one."
+                            : "We'll send you a password reset link to your email address."
                         }
                       </DialogDescription>
                     </DialogHeader>
-                    {!resetEmailSent ? (
-                      <>
-                        <div className="py-4">
-                          <div className="space-y-2">
-                            <Label>Email</Label>
-                            <Input value={user?.email || ''} disabled />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button
-                            variant="outline"
-                            onClick={handleClosePasswordDialog}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleChangePassword}
-                            disabled={isSendingReset}
-                          >
-                            {isSendingReset ? 'Sending...' : 'Send Reset Link'}
-                          </Button>
-                        </DialogFooter>
-                      </>
-                    ) : (
+                    
+                    {resetEmailSent ? (
                       <>
                         <div className="py-4">
                           <div className="text-center space-y-2">
@@ -255,6 +297,90 @@ export function AppSidebar() {
                         <DialogFooter>
                           <Button onClick={handleClosePasswordDialog}>
                             Close
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    ) : showDirectChange ? (
+                      <>
+                        <div className="py-4 space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="current-password">Current Password</Label>
+                            <Input
+                              id="current-password"
+                              type="password"
+                              value={currentPassword}
+                              onChange={(e) => setCurrentPassword(e.target.value)}
+                              placeholder="Enter your current password"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-password">New Password</Label>
+                            <Input
+                              id="new-password"
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Enter your new password"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="confirm-password">Confirm New Password</Label>
+                            <Input
+                              id="confirm-password"
+                              type="password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="Confirm your new password"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowDirectChange(false)}
+                          >
+                            Use Email Reset
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleClosePasswordDialog}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleDirectPasswordChange}
+                            disabled={isChangingPassword}
+                          >
+                            {isChangingPassword ? 'Changing...' : 'Change Password'}
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    ) : (
+                      <>
+                        <div className="py-4">
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input value={user?.email || ''} disabled />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowDirectChange(true)}
+                          >
+                            Use Direct Change
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleClosePasswordDialog}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleSendResetEmail}
+                            disabled={isSendingReset}
+                          >
+                            {isSendingReset ? 'Sending...' : 'Send Reset Link'}
                           </Button>
                         </DialogFooter>
                       </>

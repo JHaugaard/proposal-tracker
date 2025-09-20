@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,8 +75,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
+      redirectTo: `${window.location.origin}/`,
     });
+    return { error };
+  };
+
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    if (!user?.email) {
+      return { error: { message: 'No user found' } };
+    }
+
+    // First verify the current password by attempting to sign in
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (verifyError) {
+      return { error: { message: 'Current password is incorrect' } };
+    }
+
+    // Update the password
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
     return { error };
   };
 
@@ -87,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     resetPassword,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
