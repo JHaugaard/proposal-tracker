@@ -5,6 +5,9 @@ import { AppLayout } from '@/components/AppLayout';
 import Dashboard from './Dashboard';
 
 const Index = () => {
+  // TEMPORARY: Authentication checks bypassed for development
+  // Uncomment the lines below when re-enabling authentication:
+  /*
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -27,6 +30,7 @@ const Index = () => {
   if (!user) {
     return null;
   }
+  */
 
   return (
     <AppLayout>

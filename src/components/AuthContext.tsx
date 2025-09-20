@@ -24,12 +24,35 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  // TEMPORARY: Mock user for development - remove when implementing real auth
+  const mockUser = {
+    id: 'dev-user-123',
+    email: 'dev@example.com',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    role: 'authenticated'
+  } as User;
+
+  const mockSession = {
+    access_token: 'mock-token',
+    refresh_token: 'mock-refresh',
+    expires_in: 3600,
+    expires_at: Date.now() + 3600000,
+    token_type: 'bearer',
+    user: mockUser
+  } as Session;
+
+  const [user, setUser] = useState<User | null>(mockUser);
+  const [session, setSession] = useState<Session | null>(mockSession);
+  const [loading, setLoading] = useState(false); // No loading needed for mock data
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // TEMPORARY: Disabled for development
+    // Uncomment this section when re-enabling authentication:
+    /*
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -38,7 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -46,70 +68,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
+    */
   }, []);
 
+  // TEMPORARY: Mock auth functions for development
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-    return { error };
+    console.log('Mock signUp called - disabled for development');
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    console.log('Mock signIn called - disabled for development');
+    return { error: null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('Mock signOut called - disabled for development');
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/password-reset`,
-    });
-    return { error };
+    console.log('Mock resetPassword called - disabled for development');
+    return { error: null };
   };
 
   const updatePassword = async (newPassword: string) => {
-    console.log('Starting password update for user:', user?.id);
-    
-    if (!user) {
-      console.error('No authenticated user found');
-      return { error: { message: 'No authenticated user found' } };
-    }
-
-    if (!session) {
-      console.error('No active session found');
-      return { error: { message: 'No active session found' } };
-    }
-
-    try {
-      console.log('Attempting to update password...');
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) {
-        console.error('Password update error:', error);
-        return { error: { message: error.message || 'Failed to update password' } };
-      }
-
-      console.log('Password updated successfully');
-      return { error: null };
-    } catch (err) {
-      console.error('Unexpected error during password update:', err);
-      return { error: { message: 'An unexpected error occurred' } };
-    }
+    console.log('Mock updatePassword called - disabled for development');
+    return { error: null };
   };
 
   const value = {

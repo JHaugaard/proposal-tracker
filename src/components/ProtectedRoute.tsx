@@ -8,6 +8,9 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  // TEMPORARY: Authentication bypassed for development
+  // Uncomment the lines below when re-enabling authentication:
+  /*
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -30,6 +33,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (!user) {
     return null;
   }
+  */
 
   return <AppLayout>{children}</AppLayout>;
 }
