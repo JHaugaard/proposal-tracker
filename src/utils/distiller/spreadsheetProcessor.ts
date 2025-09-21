@@ -72,7 +72,7 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
         // Process each row
         const records: ProposalRecord[] = dataRows
           .filter(row => Array.isArray(row) && row.some(cell => cell !== null && cell !== undefined && cell !== ''))
-          .map((row: any[]) => {
+          .map((row: any[], index: number) => {
             const record: ProposalRecord = {
               db_no: getCellValue(row, columnMap.db_no) || '',
               pi_name: getCellValue(row, columnMap.pi_name) || '',
@@ -88,8 +88,8 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
             };
             
             // Debug first few records
-            if (records.length < 3) {
-              console.log('Raw date values for record', records.length + 1, ':', {
+            if (index < 3) {
+              console.log('Raw date values for record', index + 1, ':', {
                 date_received_raw: getCellValue(row, columnMap.date_received),
                 status_date_raw: getCellValue(row, columnMap.status_date),
                 date_received_formatted: record.date_received,
