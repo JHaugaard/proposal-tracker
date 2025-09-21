@@ -113,7 +113,45 @@ export default function DBDistiller() {
   };
 
   const handlePrint = () => {
-    window.print();
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const tableElement = document.querySelector('[data-table-container]');
+    if (tableElement) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Filtered Results - Database Distiller</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; font-weight: bold; }
+              .badge { 
+                display: inline-block; 
+                padding: 2px 6px; 
+                border-radius: 4px; 
+                font-size: 12px; 
+                background-color: #e5e7eb; 
+                color: #374151; 
+              }
+              @media print {
+                body { margin: 0; }
+                table { page-break-inside: auto; }
+                tr { page-break-inside: avoid; page-break-after: auto; }
+              }
+            </style>
+          </head>
+          <body>
+            <h2>Database Distiller - Filtered Results</h2>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+            ${tableElement.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
   };
 
   const handleReUpload = () => {
@@ -177,6 +215,27 @@ export default function DBDistiller() {
               />
             </div>
 
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 mb-4">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={handlePrint}
+                disabled={!processedData || filteredRecords.length === 0}
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </Button>
+              <Button 
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={handleReUpload}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Re-upload Spreadsheet
+              </Button>
+            </div>
+
             {/* Data Table */}
             <DataTable 
               records={filteredRecords} 
@@ -185,27 +244,6 @@ export default function DBDistiller() {
             />
           </>
         )}
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={handlePrint}
-            disabled={!processedData || filteredRecords.length === 0}
-          >
-            <Printer className="h-4 w-4" />
-            Print
-          </Button>
-          <Button 
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={handleReUpload}
-          >
-            <RotateCcw className="h-4 w-4" />
-            Re-upload Spreadsheet
-          </Button>
-        </div>
       </div>
     </div>
   );

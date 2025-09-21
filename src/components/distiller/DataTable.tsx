@@ -3,6 +3,21 @@ import { Badge } from '@/components/ui/badge';
 import { ProposalRecord } from '@/utils/distiller/spreadsheetProcessor';
 import { getStatusColor } from '@/utils/distiller/spreadsheetFilter';
 
+// Helper function to format dates for display
+function formatDisplayDate(dateString?: string): string | undefined {
+  if (!dateString) return undefined;
+  
+  // Try to parse the date
+  const date = new Date(dateString);
+  if (!isNaN(date.getTime())) {
+    // Return formatted date (MM/DD/YYYY)
+    return date.toLocaleDateString('en-US');
+  }
+  
+  // If it's already in a readable format, return as is
+  return dateString;
+}
+
 interface DataTableProps {
   records: ProposalRecord[];
   totalRecords: number;
@@ -44,6 +59,7 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
   }
 
   return (
+    <div data-table-container>
     <Card>
       <CardHeader>
         <CardTitle>
@@ -69,7 +85,7 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
               {records.map((record, index) => (
                 <tr key={index} className="border-b hover:bg-muted/50">
                   <td className="p-2 font-mono text-sm">{record.db_no}</td>
-                  <td className="p-2 text-sm">{record.date_received || '-'}</td>
+                  <td className="p-2 text-sm">{formatDisplayDate(record.date_received) || '-'}</td>
                   <td className="p-2">{record.pi_name}</td>
                   <td className="p-2">{record.sponsor_name}</td>
                   <td className="p-2 text-sm">{record.cayuse || '-'}</td>
@@ -78,7 +94,7 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
                       {record.status}
                     </Badge>
                   </td>
-                  <td className="p-2 text-sm">{record.status_date || '-'}</td>
+                  <td className="p-2 text-sm">{formatDisplayDate(record.status_date) || '-'}</td>
                   <td className="p-2 text-sm">{record.old_db || '-'}</td>
                 </tr>
               ))}
@@ -87,5 +103,6 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
