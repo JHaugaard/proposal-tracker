@@ -15,21 +15,22 @@ import { filterRecords, getUniqueStatuses } from '@/utils/distiller/spreadsheetF
 
 // Fixed 7 statuses based on UI requirements
 const FIXED_STATUSES = [
-  'In',
-  'Pending',
-  'Pending Signatures',
-  'Set-up in Process',
   'OSRAA Review',
+  'Out for Review',
   'Completed',
-  'Withdrawn'
+  'Internal Docs/Info Requested',
+  'Out for Signature',
+  'External Docs/Info Requested',
+  'Set-up in Process'
 ];
 
-// Default selected statuses (4 out of 7 based on Active screenshot)
+// Default selected statuses (5 out of 7 based on image)
 const DEFAULT_SELECTED_STATUSES = [
-  'In',
-  'Pending',
-  'Pending Signatures',
-  'Set-up in Process'
+  'OSRAA Review',
+  'Out for Review',
+  'Internal Docs/Info Requested',
+  'Out for Signature',
+  'External Docs/Info Requested'
 ];
 
 export default function DBDistiller() {
