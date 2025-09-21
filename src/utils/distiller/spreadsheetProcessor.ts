@@ -86,6 +86,17 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
               status_date: formatDate(getCellValue(row, columnMap.status_date)),
               old_db: getCellValue(row, columnMap.old_db)
             };
+            
+            // Debug first few records
+            if (records.length < 3) {
+              console.log('Raw date values for record', records.length + 1, ':', {
+                date_received_raw: getCellValue(row, columnMap.date_received),
+                status_date_raw: getCellValue(row, columnMap.status_date),
+                date_received_formatted: record.date_received,
+                status_date_formatted: record.status_date
+              });
+            }
+            
             return record;
           })
           .filter(record => record.db_no || record.pi_name || record.sponsor_name); // Filter out completely empty rows
@@ -140,11 +151,22 @@ function getCellValue(row: any[], columnIndex: number | null): string | undefine
 function formatDate(value: string | undefined): string | undefined {
   if (!value) return undefined;
   
-  // Try to parse various date formats
-  const date = new Date(value);
-  if (!isNaN(date.getTime())) {
-    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+  // Check if it's an Excel serial number (numeric)
+  const numericValue = parseFloat(value);
+  if (!isNaN(numericValue) && numericValue > 25000 && numericValue < 50000) {
+    // Excel date serial number (days since 1/1/1900)
+    const excelDate = new Date((numericValue - 25569) * 86400 * 1000);
+    if (!isNaN(excelDate.getTime())) {
+      return excelDate.toLocaleDateString('en-US'); // Returns MM/DD/YYYY format
+    }
   }
   
-  return value; // Return original if can't parse as date
+  // Try to parse as a regular date string
+  const date = new Date(value);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleDateString('en-US'); // Returns MM/DD/YYYY format
+  }
+  
+  // If it's already in a readable format, return as is
+  return value;
 }

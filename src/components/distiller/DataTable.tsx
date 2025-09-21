@@ -3,18 +3,21 @@ import { Badge } from '@/components/ui/badge';
 import { ProposalRecord } from '@/utils/distiller/spreadsheetProcessor';
 import { getStatusColor } from '@/utils/distiller/spreadsheetFilter';
 
-// Helper function to format dates for display
+// Helper function to format dates for display (now simplified since formatDate already returns MM/DD/YYYY)
 function formatDisplayDate(dateString?: string): string | undefined {
   if (!dateString) return undefined;
   
-  // Try to parse the date
+  // If it's already formatted properly, return it
+  if (dateString.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+    return dateString;
+  }
+  
+  // Try to parse and reformat if needed
   const date = new Date(dateString);
   if (!isNaN(date.getTime())) {
-    // Return formatted date (MM/DD/YYYY)
     return date.toLocaleDateString('en-US');
   }
   
-  // If it's already in a readable format, return as is
   return dateString;
 }
 
