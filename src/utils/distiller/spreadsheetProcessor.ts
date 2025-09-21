@@ -65,7 +65,9 @@ export function processExcelFile(file: File): Promise<ProcessedData> {
         
         // Log column mapping for debugging
         console.log('Column mapping detected:', columnMap);
-        console.log('GCO/GCA/SCCO column found at index:', columnMap.gco_gca_scco);
+        console.log('Headers found:', headers);
+        console.log('Date Received column found at index:', columnMap.date_received);
+        console.log('Status Date column found at index:', columnMap.status_date);
         
         // Process each row
         const records: ProposalRecord[] = dataRows

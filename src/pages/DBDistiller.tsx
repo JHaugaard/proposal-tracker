@@ -64,7 +64,13 @@ export default function DBDistiller() {
         selectedStatuses
       });
       setFilteredRecords(filtered);
-      resetTimeout(); // Reset timeout on user activity
+    }
+  }, [processedData, selectedStatuses]);
+
+  // Reset timeout when user interacts (separate effect)
+  useEffect(() => {
+    if (processedData) {
+      resetTimeout();
     }
   }, [processedData, selectedStatuses, resetTimeout]);
 
