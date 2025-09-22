@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 import { SearchBar } from '@/components/SearchBar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PIs = () => {
   const { pis, loading, createPI, refetch } = usePIs();
@@ -89,91 +90,95 @@ const PIs = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All PIs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="w-1/2">
-              <SearchBar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                resultsCount={filteredPIs.length}
-                loading={loading}
-              />
-            </div>
-            
-            <div className="flex gap-6">
-              <div className="flex-1">
-                {loading ? (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">Loading PIs...</p>
-                  </div>
-                ) : filteredPIs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {pis.length === 0 ? "No PIs found. Add your first PI to get started." : "No PIs match your search criteria."}
-                    </p>
-                    {pis.length === 0 && (
-                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add First PI
-                          </Button>
-                        </DialogTrigger>
-                      </Dialog>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {filteredPIs.map((pi) => (
-                      <div key={pi.id} className="flex items-center space-x-3 py-1 px-2 border-b hover:bg-muted/50 transition-colors">
-                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <RelatedProposalsPopover
-                            entityId={pi.id}
-                            entityName={pi.name}
-                            entityType="pi"
-                          >
-                            <button className="text-left hover:text-primary transition-colors w-full text-sm">
-                              {pi.name}
-                            </button>
-                          </RelatedProposalsPopover>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+      <div className="w-1/2">
+        <Card>
+          <CardHeader>
+            <CardTitle>All PIs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="w-full">
+                <SearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  resultsCount={filteredPIs.length}
+                  loading={loading}
+                />
               </div>
               
-              <div className="w-8 flex flex-col gap-1">
-                <div className="text-xs text-muted-foreground mb-1">Filter</div>
-                <button
-                  onClick={() => setSelectedLetter('')}
-                  className={`text-xs py-1 px-1 rounded hover:bg-muted transition-colors ${
-                    !selectedLetter ? 'bg-muted text-primary font-medium' : ''
-                  }`}
-                >
-                  All
-                </button>
-                {alphabet.map((letter) => (
+              <div className="flex gap-6">
+                <div className="flex-1">
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">Loading PIs...</p>
+                    </div>
+                  ) : filteredPIs.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {pis.length === 0 ? "No PIs found. Add your first PI to get started." : "No PIs match your search criteria."}
+                      </p>
+                      {pis.length === 0 && (
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add First PI
+                            </Button>
+                          </DialogTrigger>
+                        </Dialog>
+                      )}
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-96">
+                      <div className="space-y-1 pr-4">
+                        {filteredPIs.map((pi) => (
+                          <div key={pi.id} className="flex items-center space-x-3 py-1 px-2 border-b hover:bg-muted/50 transition-colors">
+                            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <RelatedProposalsPopover
+                                entityId={pi.id}
+                                entityName={pi.name}
+                                entityType="pi"
+                              >
+                                <button className="text-left hover:text-primary transition-colors w-full text-sm">
+                                  {pi.name}
+                                </button>
+                              </RelatedProposalsPopover>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </div>
+                
+                <div className="w-8 flex flex-col gap-1">
+                  <div className="text-xs text-muted-foreground mb-1">Filter</div>
                   <button
-                    key={letter}
-                    onClick={() => setSelectedLetter(selectedLetter === letter ? '' : letter)}
+                    onClick={() => setSelectedLetter('')}
                     className={`text-xs py-1 px-1 rounded hover:bg-muted transition-colors ${
-                      selectedLetter === letter ? 'bg-muted text-primary font-medium' : ''
+                      !selectedLetter ? 'bg-muted text-primary font-medium' : ''
                     }`}
                   >
-                    {letter}
+                    All
                   </button>
-                ))}
+                  {alphabet.map((letter) => (
+                    <button
+                      key={letter}
+                      onClick={() => setSelectedLetter(selectedLetter === letter ? '' : letter)}
+                      className={`text-xs py-1 px-1 rounded hover:bg-muted transition-colors ${
+                        selectedLetter === letter ? 'bg-muted text-primary font-medium' : ''
+                      }`}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
