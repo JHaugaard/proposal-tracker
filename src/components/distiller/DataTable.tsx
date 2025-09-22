@@ -86,19 +86,19 @@ export function DataTable({ records, totalRecords, isLoading }: DataTableProps) 
             </thead>
             <tbody>
               {records.map((record, index) => (
-                <tr key={index} className="border-b hover:bg-muted/50">
-                  <td className="p-2 font-mono text-sm">{record.db_no}</td>
-                  <td className="p-2 text-sm">{formatDisplayDate(record.date_received) || '-'}</td>
-                  <td className="p-2">{record.pi_name}</td>
-                  <td className="p-2">{record.sponsor_name}</td>
-                  <td className="p-2 text-sm">{record.cayuse || '-'}</td>
-                  <td className="p-2">
+                <tr key={index} className="hover:bg-muted/50">
+                  <td className="px-2 py-1 font-mono text-sm">{record.db_no}</td>
+                  <td className="px-2 py-1 text-sm">{formatDisplayDate(record.date_received) || '-'}</td>
+                  <td className="px-2 py-1">{record.pi_name}</td>
+                  <td className="px-2 py-1">{record.sponsor_name}</td>
+                  <td className="px-2 py-1 text-sm">{record.cayuse || '-'}</td>
+                  <td className="px-2 py-1">
                     <Badge variant="secondary" className={getStatusColor(record.status)}>
                       {record.status}
                     </Badge>
                   </td>
-                  <td className="p-2 text-sm">{formatDisplayDate(record.status_date) || '-'}</td>
-                  <td className="p-2 text-sm">{record.old_db || '-'}</td>
+                  <td className="px-2 py-1 text-sm">{formatDisplayDate(record.status_date) || '-'}</td>
+                  <td className="px-2 py-1 text-sm">{record.old_db || '-'}</td>
                 </tr>
               ))}
             </tbody>
