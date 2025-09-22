@@ -129,7 +129,7 @@ const PIs = () => {
                       )}
                     </div>
                   ) : (
-                    <ScrollArea className="h-96">
+                    <ScrollArea className="h-[600px]">
                       <div className="space-y-1 pr-4">
                         {filteredPIs.map((pi) => (
                           <div key={pi.id} className="flex items-center space-x-3 py-1 px-2 border-b hover:bg-muted/50 transition-colors">
@@ -152,11 +152,11 @@ const PIs = () => {
                   )}
                 </div>
                 
-                <div className="w-8 flex flex-col gap-1">
+                <div className="w-8 flex flex-col gap-0.5">
                   <div className="text-xs text-muted-foreground mb-1">Filter</div>
                   <button
                     onClick={() => setSelectedLetter('')}
-                    className={`text-xs py-1 px-1 rounded hover:bg-muted transition-colors ${
+                    className={`text-xs py-0.5 px-1 rounded hover:bg-muted transition-colors ${
                       !selectedLetter ? 'bg-muted text-primary font-medium' : ''
                     }`}
                   >
@@ -166,7 +166,7 @@ const PIs = () => {
                     <button
                       key={letter}
                       onClick={() => setSelectedLetter(selectedLetter === letter ? '' : letter)}
-                      className={`text-xs py-1 px-1 rounded hover:bg-muted transition-colors ${
+                      className={`text-xs py-0.5 px-1 rounded hover:bg-muted transition-colors ${
                         selectedLetter === letter ? 'bg-muted text-primary font-medium' : ''
                       }`}
                     >
