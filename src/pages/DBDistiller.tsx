@@ -131,8 +131,9 @@ export default function DBDistiller() {
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; }
               table { border-collapse: collapse; width: 100%; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; font-weight: bold; }
+              th, td { padding: 2px 8px; text-align: left; }
+              th { background-color: #f2f2f2; font-weight: bold; border-bottom: 1px solid #ddd; }
+              td { border: none; }
               .badge { 
                 display: inline-block; 
                 padding: 2px 6px; 
