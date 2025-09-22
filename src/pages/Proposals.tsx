@@ -49,10 +49,8 @@ const Proposals = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold tracking-tight">Proposals</h1>
-        </div>
-        <div className="flex gap-2">
           <Dialog open={isFormOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
               <Button>
@@ -83,13 +81,15 @@ const Proposals = () => {
               <CardTitle>All Proposals</CardTitle>
             </div>
           </div>
-          <div className="space-y-4">
-            <SearchBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              resultsCount={files.length}
-              loading={loading}
-            />
+          <div className="space-y-3">
+            <div className="w-1/2">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                resultsCount={files.length}
+                loading={loading}
+              />
+            </div>
             <StatusFilters
               activeFilter={statusFilter}
               onFilterChange={setStatusFilter}
