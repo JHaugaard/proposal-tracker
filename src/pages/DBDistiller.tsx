@@ -150,7 +150,6 @@ export default function DBDistiller() {
             </style>
           </head>
           <body>
-            <h2>Database Distiller - Filtered Results</h2>
             <p>Generated on: ${new Date().toLocaleString()}</p>
             ${tableElement.innerHTML}
           </body>
