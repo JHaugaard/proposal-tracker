@@ -8,14 +8,14 @@ interface StatusFiltersProps {
 }
 
 const statusOptions = [
-  'All',
   'In',
   'Pending',
   'Pending Signatures', 
   'Process',
   'Done',
   'On Hold',
-  'Withdrawn'
+  'Withdrawn',
+  'All'
 ];
 
 export function StatusFilters({ activeFilter, onFilterChange, statusCounts }: StatusFiltersProps) {

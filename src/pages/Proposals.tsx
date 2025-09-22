@@ -25,7 +25,6 @@ const Proposals = () => {
     handleSort,
     statusCounts,
     updateFileStatus,
-    bulkClearWithdrawnStatusChange,
     refetch,
   } = useFiles();
 
@@ -52,18 +51,8 @@ const Proposals = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Proposals</h1>
-          <p className="text-muted-foreground">
-            Manage and track all your proposals
-          </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={bulkClearWithdrawnStatusChange}
-            className="text-sm"
-          >
-            Clear Withdrawn Status Dates
-          </Button>
           <Dialog open={isFormOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
               <Button>
@@ -92,9 +81,6 @@ const Proposals = () => {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle>All Proposals</CardTitle>
-              <CardDescription>
-                Filter and manage your proposals
-              </CardDescription>
             </div>
           </div>
           <div className="space-y-4">

@@ -142,10 +142,10 @@ export function ProposalsTable({
       <TableBody>
         {files.map((file) => (
           <TableRow key={file.id}>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium py-2">
               <HighlightText text={file.db_no} searchQuery={searchQuery} />
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               <RelatedProposalsPopover
                 entityId={file.pi_id}
                 entityName={file.pi_name}
@@ -156,7 +156,7 @@ export function ProposalsTable({
                 </button>
               </RelatedProposalsPopover>
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               <RelatedProposalsPopover
                 entityId={file.sponsor_id}
                 entityName={file.sponsor_name}
@@ -167,7 +167,7 @@ export function ProposalsTable({
                 </button>
               </RelatedProposalsPopover>
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               <Select
                 value={file.status}
                 onValueChange={(value) => onStatusChange(file.id, value)}
@@ -186,19 +186,19 @@ export function ProposalsTable({
                 </SelectContent>
               </Select>
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               {file.date_received 
                 ? new Date(file.date_received).toLocaleDateString()
                 : '-'
               }
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               {file.date_status_change 
                 ? new Date(file.date_status_change).toLocaleDateString()
                 : '-'
               }
             </TableCell>
-            <TableCell>
+            <TableCell className="py-2">
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
