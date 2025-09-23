@@ -14,7 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <AppSidebar />
         <div className="flex-1">
           <AppHeader />
-          <main className="pl-8 pr-6 py-6">
+          <main className="pl-4 pr-6 py-6">
             {children}
           </main>
         </div>
