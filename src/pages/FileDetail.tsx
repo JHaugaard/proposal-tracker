@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Edit, Save, X, Trash2, ExternalLink } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { ArrowLeft, Trash2, ExternalLink, CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FileRecord } from '@/hooks/useFiles';
-import { ProposalForm } from '@/components/ProposalForm';
 import { FileAttachmentsManager } from '@/components/FileAttachmentsManager';
 import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
+import { AutocompleteInput } from '@/components/ui/autocomplete-input';
+import { usePIs } from '@/hooks/useProposalData';
+import { useSponsors } from '@/hooks/useProposalData';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -37,9 +43,22 @@ export default function FileDetail() {
   const { toast } = useToast();
   const [file, setFile] = useState<FileRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [editedStatus, setEditedStatus] = useState<string>('');
+  
+  // Individual field states for inline editing
+  const [editingPI, setEditingPI] = useState(false);
+  const [editingSponsor, setEditingSponsor] = useState(false);
+  const [editingDateReceived, setEditingDateReceived] = useState(false);
+  const [editingStatusDate, setEditingStatusDate] = useState(false);
+  
+  // Loading states for individual fields
+  const [savingPI, setSavingPI] = useState(false);
+  const [savingSponsor, setSavingSponsor] = useState(false);
+  const [savingDateReceived, setSavingDateReceived] = useState(false);
+  const [savingStatusDate, setSavingStatusDate] = useState(false);
+  
+  // Get PI and Sponsor data for autocomplete
+  const { pis, createPI } = usePIs();
+  const { sponsors, createSponsor } = useSponsors();
 
   useEffect(() => {
     if (id) {
@@ -81,7 +100,6 @@ export default function FileDetail() {
       };
 
       setFile(formattedFile);
-      setEditedStatus(formattedFile.status);
     } catch (error) {
       console.error('Error fetching file:', error);
       toast({
@@ -122,25 +140,16 @@ export default function FileDetail() {
     }
   };
 
-  const handleEditSuccess = () => {
-    setIsEditing(false);
-    fetchFile(); // Refresh the data
-  };
+  // Individual field save functions
+  const handlePIChange = async (piId: string) => {
+    if (!file || savingPI) return;
 
-  const handleStatusChange = (newStatus: string) => {
-    setEditedStatus(newStatus);
-    setHasChanges(file?.status !== newStatus);
-  };
-
-  const handleSaveChanges = async () => {
-    if (!file || !hasChanges) return;
-
+    setSavingPI(true);
     try {
       const { error } = await supabase
         .from('files')
         .update({
-          status: editedStatus as any,
-          date_status_change: new Date().toISOString(),
+          pi_id: piId,
           updated_at: new Date().toISOString(),
         })
         .eq('id', file.id);
@@ -149,18 +158,122 @@ export default function FileDetail() {
 
       toast({
         title: "Success",
-        description: "Proposal status updated successfully.",
+        description: "PI updated successfully.",
       });
 
-      setHasChanges(false);
-      await fetchFile(); // Refresh the data
+      await fetchFile();
+      setEditingPI(false);
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error('Error updating PI:', error);
       toast({
         title: "Error",
-        description: "Failed to update status. Please try again.",
+        description: "Failed to update PI. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setSavingPI(false);
+    }
+  };
+
+  const handleSponsorChange = async (sponsorId: string) => {
+    if (!file || savingSponsor) return;
+
+    setSavingSponsor(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          sponsor_id: sponsorId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Sponsor updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingSponsor(false);
+    } catch (error) {
+      console.error('Error updating sponsor:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update sponsor. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingSponsor(false);
+    }
+  };
+
+  const handleDateReceivedChange = async (date: Date | undefined) => {
+    if (!file || savingDateReceived) return;
+
+    setSavingDateReceived(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          date_received: date?.toISOString().split('T')[0] || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Date received updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingDateReceived(false);
+    } catch (error) {
+      console.error('Error updating date received:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update date received. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingDateReceived(false);
+    }
+  };
+
+  const handleStatusDateChange = async (date: Date | undefined) => {
+    if (!file || savingStatusDate) return;
+
+    setSavingStatusDate(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          date_status_change: date?.toISOString() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Status date updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingStatusDate(false);
+    } catch (error) {
+      console.error('Error updating status date:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update status date. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingStatusDate(false);
     }
   };
 
@@ -214,72 +327,35 @@ export default function FileDetail() {
         </div>
         
         <div className="flex items-center gap-2">
-          {!isEditing ? (
-            <>
-              {hasChanges && (
-                <Button onClick={handleSaveChanges}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </Button>
-              )}
-              <Button onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
               </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Proposal</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this proposal? This action cannot be undone and will also delete all associated file attachments.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete Proposal
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel Edit
-            </Button>
-          )}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Proposal</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this proposal? This action cannot be undone and will also delete all associated file attachments.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete Proposal
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
-      {isEditing ? (
-        /* Edit Mode */
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit Proposal</CardTitle>
-            <CardDescription>
-              Update the proposal information below
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProposalForm 
-              onSuccess={handleEditSuccess} 
-              editingFile={file}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        /* View Mode */
-        <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
           {/* Main Information */}
           <Card>
             <CardHeader>
@@ -294,27 +370,9 @@ export default function FileDetail() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
                   <div className="mt-1">
-                    <Select
-                      value={editedStatus}
-                      onValueChange={handleStatusChange}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          <Badge variant={getStatusColor(editedStatus)}>
-                            {editedStatus}
-                          </Badge>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            <Badge variant={getStatusColor(status)}>
-                              {status}
-                            </Badge>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant={getStatusColor(file.status)}>
+                      {file.status}
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -322,30 +380,84 @@ export default function FileDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">PI</label>
-                  <div>
-                    <RelatedProposalsPopover
-                      entityId={file.pi_id}
-                      entityName={file.pi_name}
-                      entityType="pi"
-                    >
-                      <button className="font-medium text-primary hover:underline text-left">
-                        {file.pi_name}
-                      </button>
-                    </RelatedProposalsPopover>
+                  <div className="mt-1">
+                    {editingPI ? (
+                      <AutocompleteInput
+                        items={pis}
+                        value={file.pi_id}
+                        onSelect={handlePIChange}
+                        onCreate={async (name) => {
+                          const newPI = await createPI(name);
+                          if (newPI) {
+                            handlePIChange(newPI.id);
+                          }
+                        }}
+                        placeholder="Select or create PI"
+                        createLabel="Create new PI"
+                        disabled={savingPI}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <RelatedProposalsPopover
+                          entityId={file.pi_id}
+                          entityName={file.pi_name}
+                          entityType="pi"
+                        >
+                          <button className="font-medium text-primary hover:underline text-left">
+                            {file.pi_name}
+                          </button>
+                        </RelatedProposalsPopover>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingPI(true)}
+                          disabled={savingPI}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Sponsor</label>
-                  <div>
-                    <RelatedProposalsPopover
-                      entityId={file.sponsor_id}
-                      entityName={file.sponsor_name}
-                      entityType="sponsor"
-                    >
-                      <button className="font-medium text-primary hover:underline text-left">
-                        {file.sponsor_name}
-                      </button>
-                    </RelatedProposalsPopover>
+                  <div className="mt-1">
+                    {editingSponsor ? (
+                      <AutocompleteInput
+                        items={sponsors}
+                        value={file.sponsor_id}
+                        onSelect={handleSponsorChange}
+                        onCreate={async (name) => {
+                          const newSponsor = await createSponsor(name);
+                          if (newSponsor) {
+                            handleSponsorChange(newSponsor.id);
+                          }
+                        }}
+                        placeholder="Select or create sponsor"
+                        createLabel="Create new sponsor"
+                        disabled={savingSponsor}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <RelatedProposalsPopover
+                          entityId={file.sponsor_id}
+                          entityName={file.sponsor_name}
+                          entityType="sponsor"
+                        >
+                          <button className="font-medium text-primary hover:underline text-left">
+                            {file.sponsor_name}
+                          </button>
+                        </RelatedProposalsPopover>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingSponsor(true)}
+                          disabled={savingSponsor}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -389,25 +501,106 @@ export default function FileDetail() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Date Received</label>
-                <p className="font-medium">
-                  {file.date_received 
-                    ? new Date(file.date_received).toLocaleDateString()
-                    : 'Not set'
-                  }
-                </p>
+                <div className="mt-1">
+                  {editingDateReceived ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !file.date_received && "text-muted-foreground"
+                          )}
+                          disabled={savingDateReceived}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {file.date_received ? format(new Date(file.date_received), "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={file.date_received ? new Date(file.date_received) : undefined}
+                          onSelect={handleDateReceivedChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">
+                        {file.date_received 
+                          ? new Date(file.date_received).toLocaleDateString()
+                          : 'Not set'
+                        }
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingDateReceived(true)}
+                        disabled={savingDateReceived}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Status Last Changed</label>
-                <p className="font-medium">
-                  {file.date_status_change 
-                    ? (() => {
-                        const d = new Date(file.date_status_change);
-                        return !isNaN(d.getTime()) ? d.toLocaleDateString() : 'Not set';
-                      })()
-                    : 'Not set'
-                  }
-                </p>
+                <div className="mt-1">
+                  {editingStatusDate ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !file.date_status_change && "text-muted-foreground"
+                          )}
+                          disabled={savingStatusDate}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {file.date_status_change 
+                            ? format(new Date(file.date_status_change), "PPP") 
+                            : "Pick a date"
+                          }
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={file.date_status_change ? new Date(file.date_status_change) : undefined}
+                          onSelect={handleStatusDateChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">
+                        {file.date_status_change 
+                          ? (() => {
+                              const d = new Date(file.date_status_change);
+                              return !isNaN(d.getTime()) ? d.toLocaleDateString() : 'Not set';
+                            })()
+                          : 'Not set'
+                        }
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingStatusDate(true)}
+                        disabled={savingStatusDate}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {file.to_set_up && (
@@ -435,12 +628,9 @@ export default function FileDetail() {
             </CardContent>
           </Card>
         </div>
-      )}
 
       {/* File Attachments */}
-      {!isEditing && (
-        <FileAttachmentsManager fileId={file.id} />
-      )}
+      <FileAttachmentsManager fileId={file.id} />
     </div>
   );
 }
