@@ -210,7 +210,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <div className="flex items-center justify-between">
             <SidebarGroupLabel className="text-sm font-semibold">
-              {!isCollapsed && 'Proposal Tracker'}
+              {/* Removed redundant title */}
             </SidebarGroupLabel>
             <SidebarTrigger className="h-6 w-6" />
           </div>
