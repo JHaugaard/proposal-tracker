@@ -50,15 +50,15 @@ const Dashboard = () => {
     : [];
   
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="max-w-7xl space-y-6">
+      <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
           Overview of Proposals
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {statusCards.map(({ status, icon: Icon, label }) => (
           <Card 
             key={status}
@@ -83,7 +83,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-start mt-6">
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button>
