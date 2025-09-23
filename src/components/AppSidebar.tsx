@@ -208,10 +208,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex items-center justify-between">
-            <SidebarGroupLabel className="text-sm font-semibold">
-              {!isCollapsed && 'Proposal Tracker'}
-            </SidebarGroupLabel>
+          <div className="flex items-center justify-end">
             <SidebarTrigger className="h-6 w-6" />
           </div>
           
