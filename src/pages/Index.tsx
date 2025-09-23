@@ -33,9 +33,7 @@ const Index = () => {
   */
 
   return (
-    <AppLayout>
-      <Dashboard />
-    </AppLayout>
+    <Dashboard />
   );
 };
 
