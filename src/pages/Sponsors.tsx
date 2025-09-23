@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Plus, Building2 } from 'lucide-react';
+import { Plus, Building2, Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useSponsors } from '@/hooks/useProposalData';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -12,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Sponsors = () => {
   const { sponsors, loading, createSponsor, refetch } = useSponsors();
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newSponsorName, setNewSponsorName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,6 +141,14 @@ const Sponsors = () => {
                         </button>
                       </RelatedProposalsPopover>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/sponsors/${sponsor.id}/edit`)}
+                      className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
                   </div>
                 ))}
               </div>

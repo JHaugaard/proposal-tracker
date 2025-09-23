@@ -10,7 +10,9 @@ import Auth from "./pages/Auth";
 import Proposals from "./pages/Proposals";
 import FileDetail from "./pages/FileDetail";
 import PIs from "./pages/PIs";
+import EditPI from "./pages/EditPI";
 import Sponsors from "./pages/Sponsors";
+import EditSponsor from "./pages/EditSponsor";
 import Settings from "./pages/Settings";
 import ImportData from "./pages/ImportData";
 import DBDistiller from "./pages/DBDistiller";
@@ -31,7 +33,9 @@ const App = () => (
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
             <Route path="/proposals/:id" element={<ProtectedRoute><FileDetail /></ProtectedRoute>} />
             <Route path="/pis" element={<ProtectedRoute><PIs /></ProtectedRoute>} />
+            <Route path="/pis/:id/edit" element={<ProtectedRoute><EditPI /></ProtectedRoute>} />
             <Route path="/sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
+            <Route path="/sponsors/:id/edit" element={<ProtectedRoute><EditSponsor /></ProtectedRoute>} />
             <Route path="/import" element={<ProtectedRoute><ImportData /></ProtectedRoute>} />
             <Route path="/distiller" element={<ProtectedRoute><DBDistiller /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
