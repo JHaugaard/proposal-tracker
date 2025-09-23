@@ -284,9 +284,6 @@ export default function FileDetail() {
           <Card>
             <CardHeader>
               <CardTitle>Proposal Information</CardTitle>
-              <CardDescription>
-                Key details about this proposal
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -325,27 +322,31 @@ export default function FileDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">PI</label>
-                  <RelatedProposalsPopover
-                    entityId={file.pi_id}
-                    entityName={file.pi_name}
-                    entityType="pi"
-                  >
-                    <button className="font-medium text-primary hover:underline text-left">
-                      {file.pi_name}
-                    </button>
-                  </RelatedProposalsPopover>
+                  <div>
+                    <RelatedProposalsPopover
+                      entityId={file.pi_id}
+                      entityName={file.pi_name}
+                      entityType="pi"
+                    >
+                      <button className="font-medium text-primary hover:underline text-left">
+                        {file.pi_name}
+                      </button>
+                    </RelatedProposalsPopover>
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Sponsor</label>
-                  <RelatedProposalsPopover
-                    entityId={file.sponsor_id}
-                    entityName={file.sponsor_name}
-                    entityType="sponsor"
-                  >
-                    <button className="font-medium text-primary hover:underline text-left">
-                      {file.sponsor_name}
-                    </button>
-                  </RelatedProposalsPopover>
+                  <div>
+                    <RelatedProposalsPopover
+                      entityId={file.sponsor_id}
+                      entityName={file.sponsor_name}
+                      entityType="sponsor"
+                    >
+                      <button className="font-medium text-primary hover:underline text-left">
+                        {file.sponsor_name}
+                      </button>
+                    </RelatedProposalsPopover>
+                  </div>
                 </div>
               </div>
 
@@ -384,9 +385,6 @@ export default function FileDetail() {
           <Card>
             <CardHeader>
               <CardTitle>Important Dates</CardTitle>
-              <CardDescription>
-                Timeline information for this proposal
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
