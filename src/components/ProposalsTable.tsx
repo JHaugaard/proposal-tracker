@@ -176,8 +176,8 @@ export function ProposalsTable({
                 value={file.status}
                 onValueChange={(value) => onStatusChange(file.id, value)}
               >
-                <SelectTrigger className="w-auto h-auto p-0 border-0 shadow-none">
-                  <Badge variant={getStatusColor(file.status)}>
+                <SelectTrigger className="w-auto h-auto p-0 border-0 shadow-none justify-start">
+                  <Badge variant={getStatusColor(file.status)} className="justify-start text-left">
                     {file.status}
                   </Badge>
                 </SelectTrigger>

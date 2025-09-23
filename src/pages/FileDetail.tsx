@@ -369,8 +369,8 @@ export default function FileDetail() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="mt-1">
-                    <Badge variant={getStatusColor(file.status)}>
+                  <div className="mt-1 flex justify-start">
+                    <Badge variant={getStatusColor(file.status)} className="justify-start text-left">
                       {file.status}
                     </Badge>
                   </div>
