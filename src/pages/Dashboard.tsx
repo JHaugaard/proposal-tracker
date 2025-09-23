@@ -121,7 +121,6 @@ const Dashboard = () => {
               sortDirection={sortDirection}
               onSort={handleSort}
               onStatusChange={updateFileStatus}
-              onEdit={handleEditProposal}
             />
           </div>
         </div>

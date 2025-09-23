@@ -2,10 +2,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { FileRecord, SortField, SortDirection } from '@/hooks/useFiles';
 import { HighlightText } from './HighlightText';
 import { RelatedProposalsPopover } from './RelatedProposalsPopover';
+import { useNavigate } from 'react-router-dom';
 
 interface ProposalsTableProps {
   files: FileRecord[];
@@ -14,7 +15,6 @@ interface ProposalsTableProps {
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;
   onStatusChange: (fileId: string, status: string) => void;
-  onEdit: (file: FileRecord) => void;
   searchQuery?: string;
 }
 
@@ -91,9 +91,9 @@ export function ProposalsTable({
   sortDirection,
   onSort,
   onStatusChange,
-  onEdit,
   searchQuery = '',
 }: ProposalsTableProps) {
+  const navigate = useNavigate();
   if (loading) {
     return (
       <div className="space-y-3">
@@ -136,14 +136,18 @@ export function ProposalsTable({
           <SortableHeader field="date_status_change" currentField={sortField} direction={sortDirection} onSort={onSort}>
             Status Changed
           </SortableHeader>
-          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {files.map((file) => (
           <TableRow key={file.id}>
             <TableCell className="font-medium py-1">
-              <HighlightText text={file.db_no} searchQuery={searchQuery} />
+              <button 
+                onClick={() => navigate(`/proposals/${file.id}`)}
+                className="text-left hover:text-primary transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                <HighlightText text={file.db_no} searchQuery={searchQuery} />
+              </button>
             </TableCell>
             <TableCell className="py-1">
               <RelatedProposalsPopover
@@ -197,24 +201,6 @@ export function ProposalsTable({
                 ? new Date(file.date_status_change).toLocaleDateString()
                 : '-'
               }
-            </TableCell>
-            <TableCell className="py-1">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(file)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(`/proposals/${file.id}`, '_blank')}
-                >
-                  View
-                </Button>
-              </div>
             </TableCell>
           </TableRow>
         ))}

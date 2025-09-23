@@ -125,7 +125,6 @@ const Proposals = () => {
               sortDirection={sortDirection}
               onSort={handleSort}
               onStatusChange={updateFileStatus}
-              onEdit={handleEdit}
               searchQuery={searchQuery}
             />
           )}
