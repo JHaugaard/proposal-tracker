@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Users, Building2, TrendingUp, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ProposalForm } from '@/components/ProposalForm';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useFiles } from '@/hooks/useFiles';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,10 +18,12 @@ const Dashboard = () => {
     updateFileStatus, 
     handleSort, 
     sortField, 
-    sortDirection 
+    sortDirection,
+    refetch
   } = useFiles();
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   
   const statusCards = [
     { status: 'In', icon: FileText, label: 'In' },
@@ -34,6 +38,11 @@ const Dashboard = () => {
 
   const handleEditProposal = (file: any) => {
     navigate(`/proposals/${file.id}`);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    refetch();
   };
 
   const filteredFiles = selectedStatus 
@@ -75,10 +84,20 @@ const Dashboard = () => {
       </div>
 
       <div className="flex justify-center mt-6">
-        <Button onClick={() => navigate('/proposals')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Proposal
-        </Button>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Proposal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Proposal</DialogTitle>
+            </DialogHeader>
+            <ProposalForm onSuccess={handleFormSuccess} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {selectedStatus && (
