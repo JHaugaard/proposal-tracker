@@ -10,22 +10,23 @@ import { useToast } from '@/hooks/use-toast';
 import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 import { SearchBar } from '@/components/SearchBar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 
 const Sponsors = () => {
   const { sponsors, loading, createSponsor, refetch } = useSponsors();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newSponsorName, setNewSponsorName] = useState('');
+  const [selectedSponsorId, setSelectedSponsorId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('');
   const { toast } = useToast();
 
-  const handleCreateSponsor = async () => {
-    if (!newSponsorName.trim()) return;
-    
-    const result = await createSponsor(newSponsorName.trim());
+  const handleCreateSponsor = async (name: string) => {
+    const result = await createSponsor(name.trim());
     if (result) {
       setNewSponsorName('');
+      setSelectedSponsorId(result.id);
       setIsDialogOpen(false);
       toast({
         title: "Success",
@@ -36,6 +37,18 @@ const Sponsors = () => {
         title: "Error",
         description: "Failed to create sponsor",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelectSponsor = (sponsorId: string) => {
+    setSelectedSponsorId(sponsorId);
+    setIsDialogOpen(false);
+    const selectedSponsor = sponsors.find(sponsor => sponsor.id === sponsorId);
+    if (selectedSponsor) {
+      toast({
+        title: "Selected",
+        description: `Selected ${selectedSponsor.name}`,
       });
     }
   };
@@ -62,25 +75,27 @@ const Sponsors = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Sponsor</DialogTitle>
+              <DialogTitle>Add Sponsor</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="sponsor-name">Sponsor Name</Label>
-                <Input
-                  id="sponsor-name"
-                  value={newSponsorName}
-                  onChange={(e) => setNewSponsorName(e.target.value)}
-                  placeholder="Enter sponsor name"
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateSponsor()}
+                <Label htmlFor="sponsor-autocomplete">Search or Add Sponsor</Label>
+                <AutocompleteInput
+                  items={sponsors.map(sponsor => ({ id: sponsor.id, name: sponsor.name }))}
+                  value={selectedSponsorId}
+                  onSelect={handleSelectSponsor}
+                  onCreate={handleCreateSponsor}
+                  placeholder="Search existing sponsors or type new name"
+                  createLabel="Create Sponsor"
+                  className="w-full"
                 />
               </div>
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button variant="outline" onClick={() => {
+                  setIsDialogOpen(false);
+                  setSelectedSponsorId('');
+                }}>
                   Cancel
-                </Button>
-                <Button onClick={handleCreateSponsor} disabled={!newSponsorName.trim()}>
-                  Create Sponsor
                 </Button>
               </div>
             </div>

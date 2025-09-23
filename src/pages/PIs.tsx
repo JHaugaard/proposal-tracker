@@ -11,12 +11,14 @@ import { useToast } from '@/hooks/use-toast';
 import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 import { SearchBar } from '@/components/SearchBar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 
 const PIs = () => {
   const { pis, loading, createPI, refetch } = usePIs();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPIName, setNewPIName] = useState('');
+  const [selectedPIId, setSelectedPIId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('');
   const { toast } = useToast();
@@ -31,12 +33,11 @@ const PIs = () => {
   // Generate alphabet letters
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  const handleCreatePI = async () => {
-    if (!newPIName.trim()) return;
-    
-    const result = await createPI(newPIName.trim());
+  const handleCreatePI = async (name: string) => {
+    const result = await createPI(name.trim());
     if (result) {
       setNewPIName('');
+      setSelectedPIId(result.id);
       setIsDialogOpen(false);
       toast({
         title: "Success",
@@ -47,6 +48,18 @@ const PIs = () => {
         title: "Error",
         description: "Failed to create PI",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelectPI = (piId: string) => {
+    setSelectedPIId(piId);
+    setIsDialogOpen(false);
+    const selectedPI = pis.find(pi => pi.id === piId);
+    if (selectedPI) {
+      toast({
+        title: "Selected",
+        description: `Selected ${selectedPI.name}`,
       });
     }
   };
@@ -65,25 +78,27 @@ const PIs = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Principal Investigator</DialogTitle>
+                <DialogTitle>Add Principal Investigator</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="pi-name">PI Name</Label>
-                  <Input
-                    id="pi-name"
-                    value={newPIName}
-                    onChange={(e) => setNewPIName(e.target.value)}
-                    placeholder="Enter PI name"
-                    onKeyDown={(e) => e.key === 'Enter' && handleCreatePI()}
+                  <Label htmlFor="pi-autocomplete">Search or Add PI</Label>
+                  <AutocompleteInput
+                    items={pis.map(pi => ({ id: pi.id, name: pi.name }))}
+                    value={selectedPIId}
+                    onSelect={handleSelectPI}
+                    onCreate={handleCreatePI}
+                    placeholder="Search existing PIs or type new name"
+                    createLabel="Create PI"
+                    className="w-full"
                   />
                 </div>
                 <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setIsDialogOpen(false);
+                    setSelectedPIId('');
+                  }}>
                     Cancel
-                  </Button>
-                  <Button onClick={handleCreatePI} disabled={!newPIName.trim()}>
-                    Create PI
                   </Button>
                 </div>
               </div>
