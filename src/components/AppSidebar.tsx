@@ -208,7 +208,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
+            <SidebarGroupLabel className="text-sm font-semibold">
+              {/* Removed redundant title */}
+            </SidebarGroupLabel>
             <SidebarTrigger className="h-6 w-6" />
           </div>
           
