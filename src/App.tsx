@@ -13,7 +13,7 @@ import PIs from "./pages/PIs";
 import EditPI from "./pages/EditPI";
 import Sponsors from "./pages/Sponsors";
 import EditSponsor from "./pages/EditSponsor";
-import Settings from "./pages/Settings";
+
 import ImportData from "./pages/ImportData";
 import DBDistiller from "./pages/DBDistiller";
 import NotFound from "./pages/NotFound";
@@ -38,7 +38,7 @@ const App = () => (
             <Route path="/sponsors/:id/edit" element={<ProtectedRoute><EditSponsor /></ProtectedRoute>} />
             <Route path="/import" element={<ProtectedRoute><ImportData /></ProtectedRoute>} />
             <Route path="/distiller" element={<ProtectedRoute><DBDistiller /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            
             <Route path="/auth" element={<Auth />} />
             <Route path="/password-reset" element={<PasswordReset />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

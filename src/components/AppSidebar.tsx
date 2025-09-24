@@ -1,4 +1,4 @@
-import { FileText, Users, Building2, Database, Settings, User, Edit, Key, LogOut, Zap } from 'lucide-react';
+import { FileText, Users, Building2, Database, User, Edit, Key, LogOut, Zap } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +35,6 @@ const navigationItems = [
   { title: 'PIs', url: '/pis', icon: Users },
   { title: 'Sponsors', url: '/sponsors', icon: Building2 },
   { title: 'DB Distiller', url: '/distiller', icon: Zap },
-  { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
