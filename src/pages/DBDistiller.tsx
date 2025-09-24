@@ -169,81 +169,79 @@ export default function DBDistiller() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold tracking-tight">Database Distiller</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold tracking-tight">Database Distiller</h1>
+      </div>
+
+      {!processedData ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* File Upload Section */}
+          <FileUpload onFileUpload={handleFileUpload} isProcessing={isProcessing} />
+
+          {/* Placeholder for Status Filter */}
+          <StatusFilter
+            statuses={FIXED_STATUSES}
+            selectedStatuses={DEFAULT_SELECTED_STATUSES}
+            onStatusChange={() => {}}
+            onSelectAll={() => {}}
+            onClearAll={() => {}}
+          />
         </div>
-
-        {!processedData ? (
+      ) : (
+        <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* File Upload Section */}
-            <FileUpload onFileUpload={handleFileUpload} isProcessing={isProcessing} />
+            {/* File Info Section */}
+            <div className="text-center p-6 bg-muted/50 rounded-lg">
+              <h3 className="font-semibold mb-2">File Loaded</h3>
+              <p className="text-sm text-muted-foreground">
+                {processedData.totalRecords} records processed
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Loaded at: {new Date(processedData.processedAt).toLocaleString()}
+              </p>
+            </div>
 
-            {/* Placeholder for Status Filter */}
+            {/* Status Filter Section */}
             <StatusFilter
               statuses={FIXED_STATUSES}
-              selectedStatuses={DEFAULT_SELECTED_STATUSES}
-              onStatusChange={() => {}}
-              onSelectAll={() => {}}
-              onClearAll={() => {}}
+              selectedStatuses={selectedStatuses}
+              onStatusChange={handleStatusChange}
+              onSelectAll={handleSelectAll}
+              onClearAll={handleClearAll}
             />
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* File Info Section */}
-              <div className="text-center p-6 bg-muted/50 rounded-lg">
-                <h3 className="font-semibold mb-2">File Loaded</h3>
-                <p className="text-sm text-muted-foreground">
-                  {processedData.totalRecords} records processed
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Loaded at: {new Date(processedData.processedAt).toLocaleString()}
-                </p>
-              </div>
 
-              {/* Status Filter Section */}
-              <StatusFilter
-                statuses={FIXED_STATUSES}
-                selectedStatuses={selectedStatuses}
-                onStatusChange={handleStatusChange}
-                onSelectAll={handleSelectAll}
-                onClearAll={handleClearAll}
-              />
-            </div>
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 mb-4">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={handlePrint}
+              disabled={!processedData || filteredRecords.length === 0}
+            >
+              <Printer className="h-4 w-4" />
+              Print
+            </Button>
+            <Button 
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={handleReUpload}
+            >
+              <RotateCcw className="h-4 w-4" />
+              Re-upload Spreadsheet
+            </Button>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2 mb-4">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={handlePrint}
-                disabled={!processedData || filteredRecords.length === 0}
-              >
-                <Printer className="h-4 w-4" />
-                Print
-              </Button>
-              <Button 
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={handleReUpload}
-              >
-                <RotateCcw className="h-4 w-4" />
-                Re-upload Spreadsheet
-              </Button>
-            </div>
-
-            {/* Data Table */}
-            <DataTable 
-              records={filteredRecords} 
-              totalRecords={processedData.totalRecords}
-              isLoading={isProcessing}
-            />
-          </>
-        )}
-      </div>
+          {/* Data Table */}
+          <DataTable 
+            records={filteredRecords} 
+            totalRecords={processedData.totalRecords}
+            isLoading={isProcessing}
+          />
+        </>
+      )}
     </div>
   );
 }
