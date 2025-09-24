@@ -172,15 +172,8 @@ export default function DBDistiller() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold tracking-tight">Database Distiller</h1>
-          <h2 className="text-xl text-muted-foreground">FY 2026 Sponsored Agreements Database</h2>
-          <p className="text-sm text-muted-foreground">
-            Drop in the FY26 Sponsored Agreements DB as an Excel Spreadsheet. Choose the Statuses you want to show. Check/Uncheck to update.
-          </p>
-          <p className="text-sm text-blue-600">
-            Filtering by GCO/GCA/SCCO: "Haugaard"
-          </p>
         </div>
 
         {!processedData ? (
