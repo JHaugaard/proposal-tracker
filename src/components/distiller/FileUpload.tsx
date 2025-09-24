@@ -37,9 +37,6 @@ export function FileUpload({ onFileUpload, isProcessing }: FileUploadProps) {
           <Upload className="h-5 w-5" />
           DB as Excel Spreadsheet
         </CardTitle>
-        <CardDescription>
-          Drop your FY26 Sponsored Agreements DataBase.xlsx file here or click to browse
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div 

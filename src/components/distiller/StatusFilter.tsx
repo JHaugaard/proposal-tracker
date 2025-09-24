@@ -25,9 +25,6 @@ export function StatusFilter({
           <Filter className="h-5 w-5" />
           Filter by Status
         </CardTitle>
-        <CardDescription>
-          Select statuses to include when distilling the DB. ({selectedStatuses.length} of {statuses.length} selected)
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
