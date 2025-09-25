@@ -28,7 +28,6 @@ const proposalFormSchema = z.object({
   status: z.enum(['In', 'Pending', 'Pending Signatures', 'Process', 'Done', 'On Hold', 'Withdrawn']),
   date_received: z.date({ required_error: 'Date received is required' }),
   notes: z.string().optional(),
-  external_link: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
 });
 
 type ProposalFormData = z.infer<typeof proposalFormSchema>;
@@ -60,7 +59,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
       status: 'In',
       cayuse: '',
       notes: '',
-      external_link: '',
     },
   });
 
@@ -79,7 +77,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
         status: normalizedStatus,
         cayuse: editingFile.cayuse || '',
         notes: editingFile.notes || '',
-        external_link: editingFile.external_link || '',
         date_received: editingFile.date_received ? new Date(editingFile.date_received) : undefined,
       });
     } else {
@@ -87,7 +84,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
         status: 'In',
         cayuse: '',
         notes: '',
-        external_link: '',
       });
     }
   }, [editingFile, form]);
@@ -143,7 +139,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
           status: data.status,
           date_received: format(data.date_received, 'yyyy-MM-dd'),
           notes: data.notes || null,
-          external_link: data.external_link || null,
           updated_at: new Date().toISOString(),
         };
 
@@ -171,7 +166,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
             status: data.status,
             date_received: format(data.date_received, 'yyyy-MM-dd'),
             notes: data.notes || null,
-            external_link: data.external_link || null,
             date_status_change: new Date().toISOString(),
           }]);
 
@@ -202,7 +196,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
         status: editingFile.status,
         cayuse: editingFile.cayuse || '',
         notes: editingFile.notes || '',
-        external_link: editingFile.external_link || '',
         date_received: editingFile.date_received ? new Date(editingFile.date_received) : undefined,
       });
     } else {
@@ -211,7 +204,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
         status: 'In',
         cayuse: '',
         notes: '',
-        external_link: '',
       });
     }
   };
@@ -354,19 +346,6 @@ export function ProposalForm({ onSuccess, editingFile }: ProposalFormProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="external_link">External Link</Label>
-            <Input
-              id="external_link"
-              {...form.register('external_link')}
-              placeholder="https://example.com"
-              type="url"
-              className={form.formState.errors.external_link ? 'border-destructive' : ''}
-            />
-            {form.formState.errors.external_link && (
-              <p className="text-sm text-destructive">{form.formState.errors.external_link.message}</p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
