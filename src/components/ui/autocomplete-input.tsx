@@ -82,7 +82,7 @@ export function AutocompleteInput({
             value={searchValue}
             onValueChange={setSearchValue}
           />
-          <CommandList>
+          <CommandList className="max-h-60 overflow-y-auto">
             {filteredItems.length === 0 && !showCreateOption ? (
               <CommandEmpty>
                 {searchValue ? `No results found for "${searchValue}".` : "Start typing to search..."}
