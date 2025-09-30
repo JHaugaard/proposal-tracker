@@ -43,8 +43,9 @@ export function getStatusColorForPrint(status: string): { bg: string; text: stri
   const statusLower = status.toLowerCase();
   
   if (statusLower.includes('completed')) return { bg: '#dcfce7', text: '#166534' };
-  if (statusLower.includes('review')) return { bg: '#fef9c3', text: '#854d0e' };
-  if (statusLower.includes('requested')) return { bg: '#dbeafe', text: '#1e40af' };
+  if (statusLower.includes('osraa')) return { bg: '#dbeafe', text: '#1e40af' }; // OSRAA Review - blue
+  if (statusLower.includes('review')) return { bg: '#fef9c3', text: '#854d0e' }; // Out for Review - yellow
+  if (statusLower.includes('requested')) return { bg: '#e0e7ff', text: '#3730a3' }; // Requested - indigo
   if (statusLower.includes('signature')) return { bg: '#f3e8ff', text: '#6b21a8' };
   if (statusLower.includes('process')) return { bg: '#fed7aa', text: '#9a3412' };
   
