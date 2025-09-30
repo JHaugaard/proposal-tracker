@@ -16,6 +16,8 @@ import { FileRecord } from '@/hooks/useFiles';
 import { FileAttachmentsManager } from '@/components/FileAttachmentsManager';
 import { RelatedProposalsPopover } from '@/components/RelatedProposalsPopover';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { usePIs } from '@/hooks/useProposalData';
 import { useSponsors } from '@/hooks/useProposalData';
 
@@ -49,12 +51,23 @@ export default function FileDetail() {
   const [editingSponsor, setEditingSponsor] = useState(false);
   const [editingDateReceived, setEditingDateReceived] = useState(false);
   const [editingStatusDate, setEditingStatusDate] = useState(false);
+  const [editingDBNo, setEditingDBNo] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
   
   // Loading states for individual fields
   const [savingPI, setSavingPI] = useState(false);
   const [savingSponsor, setSavingSponsor] = useState(false);
   const [savingDateReceived, setSavingDateReceived] = useState(false);
   const [savingStatusDate, setSavingStatusDate] = useState(false);
+  const [savingDBNo, setSavingDBNo] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [savingNotes, setSavingNotes] = useState(false);
+  
+  // Temporary values for editing
+  const [tempDBNo, setTempDBNo] = useState('');
+  const [tempStatus, setTempStatus] = useState('');
+  const [tempNotes, setTempNotes] = useState('');
   
   // Get PI and Sponsor data for autocomplete
   const { pis, createPI } = usePIs();
@@ -277,6 +290,109 @@ export default function FileDetail() {
     }
   };
 
+  const handleDBNoChange = async () => {
+    if (!file || savingDBNo || !tempDBNo.trim()) return;
+
+    setSavingDBNo(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          db_no: tempDBNo.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "DB No. updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingDBNo(false);
+    } catch (error) {
+      console.error('Error updating DB No.:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update DB No. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingDBNo(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!file || savingStatus) return;
+
+    setSavingStatus(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          status: newStatus as any,
+          date_status_change: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Status updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingStatus(false);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
+  const handleNotesChange = async () => {
+    if (!file || savingNotes) return;
+
+    setSavingNotes(true);
+    try {
+      const { error } = await supabase
+        .from('files')
+        .update({
+          notes: tempNotes.trim() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Notes updated successfully.",
+      });
+
+      await fetchFile();
+      setEditingNotes(false);
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   const statusOptions = ['In', 'Process', 'Pending', 'Pending Signatures', 'Done', 'On Hold', 'Withdrawn'];
 
   if (loading) {
@@ -365,14 +481,106 @@ export default function FileDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">DB No.</label>
-                  <p className="font-medium">{file.db_no}</p>
+                  <div className="mt-1">
+                    {editingDBNo ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={tempDBNo}
+                          onChange={(e) => setTempDBNo(e.target.value)}
+                          placeholder="Enter DB No."
+                          disabled={savingDBNo}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={handleDBNoChange}
+                          disabled={savingDBNo || !tempDBNo.trim()}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingDBNo(false);
+                            setTempDBNo(file.db_no);
+                          }}
+                          disabled={savingDBNo}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{file.db_no}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTempDBNo(file.db_no);
+                            setEditingDBNo(true);
+                          }}
+                          disabled={savingDBNo}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="mt-1 flex justify-start">
-                    <Badge variant={getStatusColor(file.status)} className="justify-start text-left">
-                      {file.status}
-                    </Badge>
+                  <div className="mt-1">
+                    {editingStatus ? (
+                      <div className="flex gap-2 items-center">
+                        <Select value={tempStatus} onValueChange={setTempStatus} disabled={savingStatus}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions.map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {status}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(tempStatus)}
+                          disabled={savingStatus || !tempStatus}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingStatus(false);
+                            setTempStatus(file.status);
+                          }}
+                          disabled={savingStatus}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <Badge variant={getStatusColor(file.status)} className="justify-start text-left">
+                          {file.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTempStatus(file.status);
+                            setEditingStatus(true);
+                          }}
+                          disabled={savingStatus}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -484,12 +692,61 @@ export default function FileDetail() {
                 </div>
               )}
 
-              {file.notes && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                  <p className="text-sm whitespace-pre-wrap">{file.notes}</p>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                <div className="mt-1">
+                  {editingNotes ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={tempNotes}
+                        onChange={(e) => setTempNotes(e.target.value)}
+                        placeholder="Enter notes"
+                        rows={4}
+                        disabled={savingNotes}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleNotesChange}
+                          disabled={savingNotes}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingNotes(false);
+                            setTempNotes(file.notes || '');
+                          }}
+                          disabled={savingNotes}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-start justify-between mb-1">
+                        <p className="text-sm whitespace-pre-wrap flex-1">
+                          {file.notes || 'No notes added'}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTempNotes(file.notes || '');
+                            setEditingNotes(true);
+                          }}
+                          disabled={savingNotes}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
 
