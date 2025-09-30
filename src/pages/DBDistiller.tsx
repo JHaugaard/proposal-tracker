@@ -126,13 +126,26 @@ export default function DBDistiller() {
     if (tableElement) {
       // Clone the table and add colored status badges
       const clonedTable = tableElement.cloneNode(true) as HTMLElement;
-      const badges = clonedTable.querySelectorAll('.badge');
       
-      badges.forEach((badge) => {
-        const statusText = badge.textContent || '';
-        const colors = getStatusColorForPrint(statusText);
-        (badge as HTMLElement).style.backgroundColor = colors.bg;
-        (badge as HTMLElement).style.color = colors.text;
+      // Find all table rows and target the Status column (index 5)
+      const rows = clonedTable.querySelectorAll('tbody tr');
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 5) {
+          const statusCell = cells[5]; // Status column is the 6th column (index 5)
+          const badge = statusCell.querySelector('span, div'); // Badge is typically a span or div
+          
+          if (badge) {
+            const statusText = badge.textContent || '';
+            const colors = getStatusColorForPrint(statusText);
+            (badge as HTMLElement).style.backgroundColor = colors.bg;
+            (badge as HTMLElement).style.color = colors.text;
+            (badge as HTMLElement).style.padding = '2px 8px';
+            (badge as HTMLElement).style.borderRadius = '12px';
+            (badge as HTMLElement).style.fontSize = '12px';
+            (badge as HTMLElement).style.fontWeight = '500';
+          }
+        }
       });
       
       printWindow.document.write(`
