@@ -44,6 +44,16 @@ export function AutocompleteInput({
 }: AutocompleteInputProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Auto-focus the search input when popover opens
+  React.useEffect(() => {
+    if (open && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [open]);
 
   const selectedItem = items.find(item => item.id === value);
   const filteredItems = items.filter(item =>
@@ -70,6 +80,7 @@ export function AutocompleteInput({
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           disabled={disabled}
+          onFocus={() => !disabled && setOpen(true)}
         >
           {selectedItem ? selectedItem.name : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -78,6 +89,7 @@ export function AutocompleteInput({
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover border shadow-md z-50" align="start">
         <Command shouldFilter={false}>
           <CommandInput 
+            ref={inputRef}
             placeholder={`Search ${placeholder.toLowerCase()}...`}
             value={searchValue}
             onValueChange={setSearchValue}
