@@ -7,16 +7,47 @@ export interface FilterOptions {
 export function filterRecords(records: ProposalRecord[], options: FilterOptions): ProposalRecord[] {
   let filtered = records;
   
+  // Debug: Check for proposal 1703
+  const record1703 = records.find(r => r.db_no === '1703');
+  if (record1703) {
+    console.log('Found record 1703:', {
+      db_no: record1703.db_no,
+      status: record1703.status,
+      status_length: record1703.status?.length,
+      status_chars: record1703.status?.split('').map(c => c.charCodeAt(0)),
+      gco_gca_scco: record1703.gco_gca_scco,
+      gco_length: record1703.gco_gca_scco?.length
+    });
+  } else {
+    console.log('Record 1703 not found in processed records');
+  }
+  
   // First filter by GCO/GCA/SCCO (hard-coded to "Haugaard")
-  filtered = filtered.filter(record =>
+  const afterGcoFilter = filtered.filter(record =>
     record.gco_gca_scco === "Haugaard"
   );
   
+  console.log(`Records after GCO filter: ${afterGcoFilter.length} (before: ${filtered.length})`);
+  if (record1703 && !afterGcoFilter.find(r => r.db_no === '1703')) {
+    console.log('Record 1703 filtered out by GCO filter. Expected "Haugaard", got:', record1703.gco_gca_scco);
+  }
+  
+  filtered = afterGcoFilter;
+  
   // Then filter by status (exact match only)
   if (options.selectedStatuses.length > 0) {
-    filtered = filtered.filter(record => 
+    console.log('Selected statuses for filtering:', options.selectedStatuses);
+    
+    const afterStatusFilter = filtered.filter(record => 
       options.selectedStatuses.includes(record.status)
     );
+    
+    console.log(`Records after status filter: ${afterStatusFilter.length} (before: ${filtered.length})`);
+    if (record1703 && filtered.find(r => r.db_no === '1703') && !afterStatusFilter.find(r => r.db_no === '1703')) {
+      console.log('Record 1703 filtered out by status filter. Expected one of:', options.selectedStatuses, 'got:', record1703.status);
+    }
+    
+    filtered = afterStatusFilter;
   }
   
   return filtered;
