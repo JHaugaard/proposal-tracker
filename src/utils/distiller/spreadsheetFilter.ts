@@ -31,8 +31,9 @@ export function getStatusColor(status: string): string {
   const statusLower = status.toLowerCase();
   
   if (statusLower.includes('completed')) return 'bg-green-100 text-green-800';
-  if (statusLower.includes('review')) return 'bg-yellow-100 text-yellow-800';
-  if (statusLower.includes('requested')) return 'bg-blue-100 text-blue-800';
+  if (statusLower.includes('osraa')) return 'bg-blue-100 text-blue-800'; // OSRAA Review - blue
+  if (statusLower.includes('review')) return 'bg-yellow-100 text-yellow-800'; // Out for Review - yellow
+  if (statusLower.includes('requested')) return 'bg-indigo-100 text-indigo-800'; // Requested - indigo
   if (statusLower.includes('signature')) return 'bg-purple-100 text-purple-800';
   if (statusLower.includes('process')) return 'bg-orange-100 text-orange-800';
   
