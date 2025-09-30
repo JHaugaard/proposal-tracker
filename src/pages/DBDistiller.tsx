@@ -21,7 +21,7 @@ const FIXED_STATUSES = [
   'Internal Docs/Info Requested',
   'Out for Signature',
   'External Docs/Info Requested',
-  'Set-up in Process'
+  'Set-Up in Process'
 ];
 
 // Default selected statuses (5 out of 7 based on image)
