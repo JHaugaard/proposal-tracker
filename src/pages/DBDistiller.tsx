@@ -11,7 +11,7 @@ import { DataTable } from '@/components/distiller/DataTable';
 import { useDistillerTimeout } from '@/hooks/useDistillerTimeout';
 
 import { processExcelFile, ProcessedData, ProposalRecord } from '@/utils/distiller/spreadsheetProcessor';
-import { filterRecords, getUniqueStatuses } from '@/utils/distiller/spreadsheetFilter';
+import { filterRecords, getUniqueStatuses, getStatusColorForPrint } from '@/utils/distiller/spreadsheetFilter';
 
 // Fixed 7 statuses based on UI requirements
 const FIXED_STATUSES = [
@@ -124,6 +124,17 @@ export default function DBDistiller() {
     
     const tableElement = document.querySelector('[data-table-container]');
     if (tableElement) {
+      // Clone the table and add colored status badges
+      const clonedTable = tableElement.cloneNode(true) as HTMLElement;
+      const badges = clonedTable.querySelectorAll('.badge');
+      
+      badges.forEach((badge) => {
+        const statusText = badge.textContent || '';
+        const colors = getStatusColorForPrint(statusText);
+        (badge as HTMLElement).style.backgroundColor = colors.bg;
+        (badge as HTMLElement).style.color = colors.text;
+      });
+      
       printWindow.document.write(`
         <html>
           <head>
@@ -138,9 +149,7 @@ export default function DBDistiller() {
                 display: inline-block; 
                 padding: 2px 6px; 
                 border-radius: 4px; 
-                font-size: 12px; 
-                background-color: #e5e7eb; 
-                color: #374151; 
+                font-size: 12px;
               }
               @media print {
                 body { margin: 0; }
@@ -151,7 +160,7 @@ export default function DBDistiller() {
           </head>
           <body>
             <p>Generated on: ${new Date().toLocaleString()}</p>
-            ${tableElement.innerHTML}
+            ${clonedTable.innerHTML}
           </body>
         </html>
       `);

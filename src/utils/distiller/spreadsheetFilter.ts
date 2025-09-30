@@ -38,3 +38,15 @@ export function getStatusColor(status: string): string {
   
   return 'bg-gray-100 text-gray-800';
 }
+
+export function getStatusColorForPrint(status: string): { bg: string; text: string } {
+  const statusLower = status.toLowerCase();
+  
+  if (statusLower.includes('completed')) return { bg: '#dcfce7', text: '#166534' };
+  if (statusLower.includes('review')) return { bg: '#fef9c3', text: '#854d0e' };
+  if (statusLower.includes('requested')) return { bg: '#dbeafe', text: '#1e40af' };
+  if (statusLower.includes('signature')) return { bg: '#f3e8ff', text: '#6b21a8' };
+  if (statusLower.includes('process')) return { bg: '#fed7aa', text: '#9a3412' };
+  
+  return { bg: '#f3f4f6', text: '#374151' };
+}
