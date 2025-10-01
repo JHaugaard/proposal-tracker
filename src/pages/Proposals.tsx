@@ -8,6 +8,7 @@ import { ProposalsTable } from '@/components/ProposalsTable';
 import { StatusFilters } from '@/components/StatusFilters';
 import { SearchBar } from '@/components/SearchBar';
 import { useFiles, FileRecord } from '@/hooks/useFiles';
+import { generateProposalsPDF } from '@/utils/pdfExport';
 
 const Proposals = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -44,6 +45,10 @@ const Proposals = () => {
     if (!open) {
       setEditingFile(null);
     }
+  };
+
+  const handleCreatePDF = () => {
+    generateProposalsPDF(files, statusFilter, files.length);
   };
 
   return (
@@ -94,6 +99,7 @@ const Proposals = () => {
               activeFilter={statusFilter}
               onFilterChange={setStatusFilter}
               statusCounts={statusCounts}
+              onCreatePDF={handleCreatePDF}
             />
           </div>
         </CardHeader>
