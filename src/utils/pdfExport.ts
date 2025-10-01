@@ -14,10 +14,12 @@ export function generateProposalsPDF(
   doc.setFontSize(18);
   doc.text('Proposals Report', 14, 20);
   
-  doc.setFontSize(11);
-  doc.text(`Filter: ${statusFilter}`, 14, 30);
-  doc.text(`Generated: ${format(new Date(), 'PPP p')}`, 14, 37);
-  doc.text(`Total Proposals: ${totalCount}`, 14, 44);
+  // Metadata on right side
+  doc.setFontSize(10);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  doc.text(`Filter: ${statusFilter}`, pageWidth - 14, 20, { align: 'right' });
+  doc.text(`Generated: ${format(new Date(), 'PPP p')}`, pageWidth - 14, 27, { align: 'right' });
+  doc.text(`Total Proposals: ${totalCount}`, pageWidth - 14, 34, { align: 'right' });
   
   // Prepare table data
   const tableData = files.map(file => [
@@ -31,23 +33,25 @@ export function generateProposalsPDF(
   
   // Generate table
   autoTable(doc, {
-    startY: 50,
+    startY: 42,
     head: [['DB No.', 'PI', 'Sponsor', 'Status', 'Date Received', 'Status Changed']],
     body: tableData,
     theme: 'grid',
     styles: {
       fontSize: 9,
-      cellPadding: 3,
+      cellPadding: 1.5,
     },
     headStyles: {
-      fillColor: [66, 66, 66],
-      textColor: 255,
+      fillColor: [255, 255, 255],
+      textColor: 0,
       fontStyle: 'bold',
+      lineWidth: 0.5,
+      lineColor: [0, 0, 0],
     },
     alternateRowStyles: {
       fillColor: [245, 245, 245],
     },
-    margin: { top: 50, left: 14, right: 14 },
+    margin: { top: 42, left: 14, right: 14 },
   });
   
   // Open in new tab
